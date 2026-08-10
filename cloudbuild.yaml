@@ -1,0 +1,42 @@
+substitutions:
+  _REGION: us-central1
+  _SERVICE: faretto-catalogo
+  _REPOSITORY: cloud-run-source-deploy
+
+steps:
+  - name: gcr.io/cloud-builders/docker
+    args:
+      - build
+      - --no-cache
+      - --build-arg
+      - APP_VERSION=$BUILD_ID
+      - -t
+      - ${_REGION}-docker.pkg.dev/$PROJECT_ID/${_REPOSITORY}/${_SERVICE}:$BUILD_ID
+      - .
+
+  - name: gcr.io/cloud-builders/docker
+    args:
+      - push
+      - ${_REGION}-docker.pkg.dev/$PROJECT_ID/${_REPOSITORY}/${_SERVICE}:$BUILD_ID
+
+  - name: gcr.io/google.com/cloudsdktool/cloud-sdk
+    entrypoint: gcloud
+    args:
+      - run
+      - deploy
+      - ${_SERVICE}
+      - --image=${_REGION}-docker.pkg.dev/$PROJECT_ID/${_REPOSITORY}/${_SERVICE}:$BUILD_ID
+      - --region=${_REGION}
+      - --platform=managed
+      - --allow-unauthenticated
+      - --port=8080
+      - --memory=512Mi
+      - --timeout=120
+      # VITE_SITIO_POWER_API_BASE es de build (Vite lo inyecta al compilar,
+      # no en runtime) - --update-env-vars aca no serviria de nada. El
+      # default de src/lib/api.js (https://powerenergy.cl) ya cubre
+      # produccion; para otro API base, pasarlo como --build-arg al paso de
+      # "docker build" de arriba y agregar ARG+ENV en el Dockerfile.
+
+images:
+  - ${_REGION}-docker.pkg.dev/$PROJECT_ID/${_REPOSITORY}/${_SERVICE}:$BUILD_ID
