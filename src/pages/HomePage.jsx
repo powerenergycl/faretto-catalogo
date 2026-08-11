@@ -78,8 +78,12 @@ function BannerTile({ zone, href, imagen }) {
     : <div className={`home-banner-tile ${zone}`}>{content}</div>;
 }
 
-export function HomePage({ productos, onNavigate }) {
+export function HomePage({ productos, dataStatus = 'ready', onNavigate }) {
   const familyThumbnails = pickFamilyThumbnails(productos);
+  // La franja de familias depende del feed de productos (imagen + conteo
+  // por familia) - si todavia no respondio o fallo, se omite en vez de
+  // mostrar circulos vacios con "(0)".
+  const showFamilyStrip = dataStatus === 'ready' && productos.length > 0;
 
   return (
     <>
@@ -93,21 +97,23 @@ export function HomePage({ productos, onNavigate }) {
         ))}
       </div>
 
-      <div className="round-category-strip">
-        {familyThumbnails.map((family) => (
-          <a
-            key={family.id}
-            className="round-category"
-            href={`/catalogo?familia=${family.id}`}
-            onClick={(event) => { event.preventDefault(); onNavigate(`/catalogo?familia=${family.id}`); }}
-          >
-            <span>
-              {family.imagen ? <img src={family.imagen} alt={family.label} /> : null}
-            </span>
-            <strong>{family.label} ({family.count})</strong>
-          </a>
-        ))}
-      </div>
+      {showFamilyStrip && (
+        <div className="round-category-strip">
+          {familyThumbnails.map((family) => (
+            <a
+              key={family.id}
+              className="round-category"
+              href={`/catalogo?familia=${family.id}`}
+              onClick={(event) => { event.preventDefault(); onNavigate(`/catalogo?familia=${family.id}`); }}
+            >
+              <span>
+                {family.imagen ? <img src={family.imagen} alt={family.label} /> : null}
+              </span>
+              <strong>{family.label} ({family.count})</strong>
+            </a>
+          ))}
+        </div>
+      )}
 
       <div className="home-seo-intro">
         <h1>Iluminación técnica Faretto en Chile</h1>

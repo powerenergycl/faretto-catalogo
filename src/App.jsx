@@ -35,16 +35,23 @@ export function App() {
     window.scrollTo(0, 0);
   }
 
+  const isCatalogo = route.pathname === '/catalogo';
+
   return (
     <div>
       <Header route={route} onNavigate={navigate} />
       <main className="public-main">
-        {status === 'loading' && <div className="state-box">Cargando catálogo…</div>}
-        {status === 'error' && <div className="state-box">No se pudo cargar el catálogo. Intenta de nuevo más tarde.</div>}
-        {status === 'ready' && (
-          route.pathname === '/catalogo'
-            ? <CategoryPage productos={productos} route={route} onNavigate={navigate} />
-            : <HomePage productos={productos} onNavigate={navigate} />
+        {isCatalogo ? (
+          <>
+            {status === 'loading' && <div className="state-box">Cargando catálogo…</div>}
+            {status === 'error' && <div className="state-box">No se pudo cargar el catálogo. Intenta de nuevo más tarde.</div>}
+            {status === 'ready' && <CategoryPage productos={productos} route={route} onNavigate={navigate} />}
+          </>
+        ) : (
+          // El home no depende del feed de productos para pintar sus
+          // secciones (accesos destacados, banners, blog) - solo la franja
+          // de familias usa "productos" y ya maneja el caso de lista vacia.
+          <HomePage productos={productos} dataStatus={status} onNavigate={navigate} />
         )}
       </main>
       <Footer />
