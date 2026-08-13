@@ -67,10 +67,6 @@ export function CategoryPage({ productos, route, onNavigate }) {
         Inicio <b>/</b> {activeModelo ? <>{activeFamilyLabel} <b>/</b> Modelo {activeModelo}</> : (activeFamilyLabel || 'Catálogo Faretto')}
       </div>
       <h1 className="cat-title">{pageTitle || 'Catálogo Faretto'}</h1>
-      <p className="cat-desc">
-        {filtered.length} producto{filtered.length === 1 ? '' : 's'} Faretto disponible{filtered.length === 1 ? '' : 's'}.
-        Precios con stock verificado, sincronizados desde Power Energy por SKU.
-      </p>
 
       <div className="cat-body">
         <aside className="filter-sidebar">
