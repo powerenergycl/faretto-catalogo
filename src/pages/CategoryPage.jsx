@@ -64,7 +64,7 @@ export function CategoryPage({ productos, route, onNavigate }) {
           {visible.length === 0 ? (
             <div className="state-box">No hay productos en esta familia todavía.</div>
           ) : (
-            <div className="product-grid">
+            <div className="product-sheet-list">
               {visible.map((product) => <ProductCard key={product.id} product={product} />)}
             </div>
           )}
