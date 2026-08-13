@@ -10,33 +10,29 @@ export function CategoryPage({ productos, route, onNavigate }) {
   const activeModelo = params.get('modelo') || '';
   const [visibleCount, setVisibleCount] = useState(PAGE_SIZE);
 
-  const familyCounts = useMemo(() => {
-    const counts = new Map();
-    for (const product of productos) {
-      const family = resolveFamily(product.nombre);
-      counts.set(family.id, (counts.get(family.id) || 0) + 1);
-    }
-    return counts;
-  }, [productos]);
-
   const byFamily = useMemo(() => {
     if (!activeFamily) return productos;
     return productos.filter((product) => resolveFamily(product.nombre).id === activeFamily);
   }, [productos, activeFamily]);
 
-  // Submenu de modelos: solo tiene sentido dentro de una familia activa, y
-  // solo si al menos un producto de esa familia trae "Modelo X" en el
-  // nombre (varias familias, ej. cintas LED, nunca lo traen).
-  const modelos = useMemo(() => {
-    if (!activeFamily) return [];
-    const counts = new Map();
-    for (const product of byFamily) {
+  // Arbol completo Familia -> Modelos, siempre expandido (no solo el de la
+  // familia activa) - el sidebar ahora muestra la estructura entera de
+  // entrada. No todas las familias traen "Modelo X" en el nombre (ej.
+  // cintas LED nunca), asi que varias quedan sin submenu.
+  const modelosByFamily = useMemo(() => {
+    const map = new Map();
+    for (const product of productos) {
       const modelo = resolveModelo(product.nombre);
       if (!modelo) continue;
-      counts.set(modelo, (counts.get(modelo) || 0) + 1);
+      const familyId = resolveFamily(product.nombre).id;
+      if (!map.has(familyId)) map.set(familyId, new Set());
+      map.get(familyId).add(modelo);
     }
-    return [...counts.entries()].sort(([a], [b]) => a.localeCompare(b));
-  }, [byFamily, activeFamily]);
+    for (const [familyId, modelos] of map) {
+      map.set(familyId, [...modelos].sort((a, b) => a.localeCompare(b)));
+    }
+    return map;
+  }, [productos]);
 
   const filtered = useMemo(() => {
     if (!activeModelo) return byFamily;
@@ -52,12 +48,12 @@ export function CategoryPage({ productos, route, onNavigate }) {
     onNavigate(familyId ? `/catalogo?familia=${familyId}` : '/catalogo');
   }
 
-  function selectModelo(modelo) {
+  function selectModelo(familyId, modelo) {
     setVisibleCount(PAGE_SIZE);
-    if (modelo === activeModelo) {
-      onNavigate(`/catalogo?familia=${activeFamily}`);
+    if (activeFamily === familyId && activeModelo === modelo) {
+      onNavigate(`/catalogo?familia=${familyId}`);
     } else {
-      onNavigate(`/catalogo?familia=${activeFamily}&modelo=${encodeURIComponent(modelo)}`);
+      onNavigate(`/catalogo?familia=${familyId}&modelo=${encodeURIComponent(modelo)}`);
     }
   }
 
@@ -68,38 +64,42 @@ export function CategoryPage({ productos, route, onNavigate }) {
       </div>
       <h1 className="cat-title">{pageTitle || 'Catálogo Faretto'}</h1>
 
+      <div className="cat-description">
+        Descripción de la categoría {activeFamilyLabel ? `"${activeFamilyLabel}"` : ''} (próximamente editable desde el admin).
+      </div>
+
       <div className="cat-body">
         <aside className="filter-sidebar">
           <div className="filter-sidebar-heading">
             <span>Familia</span>
           </div>
           <div className="filter-tree">
-            <button className={activeFamily === '' ? 'active' : ''} onClick={() => selectFamily('')}>
-              Todas <span className="n">{productos.length}</span>
-            </button>
-            {FAMILIES.map((family) => (
-              <div key={family.id}>
-                <button
-                  className={activeFamily === family.id ? 'active' : ''}
-                  onClick={() => selectFamily(family.id)}
-                >
-                  {family.label} <span className="n">{familyCounts.get(family.id) || 0}</span>
-                </button>
-                {activeFamily === family.id && modelos.length > 0 && (
-                  <div className="filter-tree filter-tree-sub">
-                    {modelos.map(([modelo, count]) => (
-                      <button
-                        key={modelo}
-                        className={activeModelo === modelo ? 'active' : ''}
-                        onClick={() => selectModelo(modelo)}
-                      >
-                        {modelo} <span className="n">{count}</span>
-                      </button>
-                    ))}
-                  </div>
-                )}
-              </div>
-            ))}
+            {FAMILIES.map((family) => {
+              const modelos = modelosByFamily.get(family.id) || [];
+              return (
+                <div key={family.id}>
+                  <button
+                    className={activeFamily === family.id && !activeModelo ? 'active' : ''}
+                    onClick={() => selectFamily(family.id)}
+                  >
+                    {family.label}
+                  </button>
+                  {modelos.length > 0 && (
+                    <div className="filter-tree filter-tree-sub">
+                      {modelos.map((modelo) => (
+                        <button
+                          key={modelo}
+                          className={activeFamily === family.id && activeModelo === modelo ? 'active' : ''}
+                          onClick={() => selectModelo(family.id, modelo)}
+                        >
+                          {modelo}
+                        </button>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              );
+            })}
           </div>
         </aside>
 

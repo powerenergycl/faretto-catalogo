@@ -26,6 +26,16 @@ export function ProductCard({ product }) {
         </div>
       </div>
 
+      {/* Galeria de fotos del producto (instalacion, detalle, empaque, etc.) -
+          contenido pendiente de admin, por ahora placeholders 1:1. */}
+      <div className="product-sheet-gallery">
+        {Array.from({ length: 6 }).map((_, i) => (
+          <div className="product-sheet-gallery-tile" key={i}>
+            <ImageOff size={18} />
+          </div>
+        ))}
+      </div>
+
       {specs.length > 0 && (
         <div className="product-sheet-specs">
           {specs.map((spec) => {
