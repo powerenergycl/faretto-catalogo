@@ -133,8 +133,6 @@ a:focus-visible, button:focus-visible, input:focus-visible {
 .product-sheet-media img { max-width: 100%; max-height: 100%; object-fit: contain; }
 
 .product-sheet-heading { display: grid; gap: 8px; align-content: center; }
-.product-sheet-sku { width: fit-content; border: 1px solid #999; color: var(--gray); font-size: 10px; font-weight: 800; text-transform: uppercase; padding: 4px 6px; border-radius: 3px; }
-@media (max-width: 620px) { .product-sheet-sku { justify-self: center; } }
 .product-sheet-name { font-size: 19px; line-height: 1.3; color: var(--teal); font-weight: 800; text-transform: uppercase; margin: 0; }
 .product-sheet-pdf { justify-self: end; display: inline-flex; align-items: center; gap: 6px; font-size: 11px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.02em; color: var(--teal); border: 1px solid var(--teal); border-radius: 6px; padding: 7px 12px; text-decoration: none; }
 .product-sheet-pdf:hover { background: var(--tint); }

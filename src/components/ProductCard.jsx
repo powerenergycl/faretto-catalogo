@@ -23,7 +23,6 @@ export function ProductCard({ product }) {
           ) : <ImageOff size={28} />}
         </div>
         <div className="product-sheet-heading">
-          <span className="product-sheet-sku">SKU {product.sku || 'pendiente'}</span>
           <h2 className="product-sheet-name">{product.nombre}</h2>
           {product.fichaTecnicaUrl && (
             <a className="product-sheet-pdf" href={product.fichaTecnicaUrl} target="_blank" rel="noreferrer">
