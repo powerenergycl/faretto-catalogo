@@ -5,9 +5,8 @@ import { cleanSpecValue } from '../lib/api.js';
 // Ficha "por modelo" (ver catalogo impreso de Faretto): 1 foto + 1 titulo
 // generico representan a todos los SKU que son la misma pieza en distintas
 // potencias/temperaturas de color (agrupados en lib/api.js#buildProductGroups).
-// Los atributos que se repiten igual en todo el grupo van como iconos
-// (arriba); los que cambian por SKU (potencia, medidas, lumenes...) van en
-// la tabla, con SKU + Temperatura apilados por fila cuando corresponde.
+// Orden: foto+titulo arriba, iconos de specs compartidos, galeria de fotos,
+// tabla de variantes suelta a todo el ancho al final.
 function isMaskedValue(valor = '') {
   return /^\*+$/.test(String(valor || '').trim());
 }
@@ -19,13 +18,20 @@ export function ProductCard({ ficha }) {
 
   return (
     <article className="product-sheet">
-      <div className="product-sheet-title-row">
-        <h2 className="product-sheet-name">{ficha.titulo}</h2>
-        {ficha.fichaTecnicaUrl && (
-          <a className="product-sheet-pdf" href={ficha.fichaTecnicaUrl} target="_blank" rel="noreferrer">
-            <Download size={14} /> Ficha técnica
-          </a>
-        )}
+      <div className="product-sheet-header">
+        <div className="product-sheet-media">
+          {ficha.imagen ? (
+            <img src={ficha.imagen} alt={ficha.titulo} loading="lazy" width={200} height={200} />
+          ) : <ImageOff size={28} />}
+        </div>
+        <div className="product-sheet-heading">
+          <h2 className="product-sheet-name">{ficha.titulo}</h2>
+          {ficha.fichaTecnicaUrl && (
+            <a className="product-sheet-pdf" href={ficha.fichaTecnicaUrl} target="_blank" rel="noreferrer">
+              <Download size={14} /> Ficha técnica
+            </a>
+          )}
+        </div>
       </div>
 
       {sharedSpecs.length > 0 && (
@@ -43,41 +49,6 @@ export function ProductCard({ ficha }) {
         </div>
       )}
 
-      <div className="product-sheet-body">
-        {rows.length > 0 && (
-          <div className="product-sheet-table-wrap">
-            <table className="product-sheet-table">
-              <thead>
-                <tr>
-                  <th>SKU</th>
-                  {columns.map((label) => <th key={label}>{label}</th>)}
-                  {ficha.hasTemperatura && <th>Temperatura</th>}
-                </tr>
-              </thead>
-              <tbody>
-                {rows.map((row) => (
-                  <tr key={row.skus.join('-')}>
-                    <td>{row.skus.map((sku) => <div key={sku}>{sku}</div>)}</td>
-                    {columns.map((label) => (
-                      <td key={label}>{cleanSpecValue(label, row.values[label])}</td>
-                    ))}
-                    {ficha.hasTemperatura && (
-                      <td>{row.temperaturas.map((temperatura, i) => <div key={i}>{temperatura}</div>)}</td>
-                    )}
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        )}
-
-        <div className="product-sheet-media">
-          {ficha.imagen ? (
-            <img src={ficha.imagen} alt={ficha.titulo} loading="lazy" width={360} height={360} />
-          ) : <ImageOff size={28} />}
-        </div>
-      </div>
-
       {/* Galeria de fotos del producto (instalacion, detalle, empaque, etc.) -
           contenido pendiente de admin, por ahora placeholders 1:1. */}
       <div className="product-sheet-gallery">
@@ -87,6 +58,33 @@ export function ProductCard({ ficha }) {
           </div>
         ))}
       </div>
+
+      {rows.length > 0 && (
+        <div className="product-sheet-table-wrap">
+          <table className="product-sheet-table">
+            <thead>
+              <tr>
+                <th>SKU</th>
+                {columns.map((label) => <th key={label}>{label}</th>)}
+                {ficha.hasTemperatura && <th>Temperatura</th>}
+              </tr>
+            </thead>
+            <tbody>
+              {rows.map((row) => (
+                <tr key={row.skus.join('-')}>
+                  <td>{row.skus.map((sku) => <div key={sku}>{sku}</div>)}</td>
+                  {columns.map((label) => (
+                    <td key={label}>{cleanSpecValue(label, row.values[label])}</td>
+                  ))}
+                  {ficha.hasTemperatura && (
+                    <td>{row.temperaturas.map((temperatura, i) => <div key={i}>{temperatura}</div>)}</td>
+                  )}
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      )}
 
       <div className="product-sheet-footer" />
     </article>
