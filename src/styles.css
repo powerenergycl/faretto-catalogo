@@ -125,10 +125,10 @@ a:focus-visible, button:focus-visible, input:focus-visible {
 /* ---- product sheet (hoja tipo indice, ver faretto.cl - NO es galeria) ---- */
 .product-sheet-list { display: grid; background: #fff; border: 1px solid #d7dce2; border-radius: 8px; box-shadow: 0 14px 32px rgba(1,102,102,0.06); padding: 0 20px; }
 .product-sheet { padding: 26px 4px; border-bottom: 1px solid var(--line); display: grid; gap: 18px; }
-.product-sheet:first-child { padding-top: 24px; }
+.product-sheet:first-child { padding-top: 4px; }
 .product-sheet:last-child { border-bottom: 0; padding-bottom: 24px; }
 
-.product-sheet-header { display: grid; grid-template-columns: 190px 1fr; gap: 26px; align-items: center; }
+.product-sheet-header { display: grid; grid-template-columns: 190px 1fr; gap: 26px; align-items: start; }
 @media (max-width: 620px) { .product-sheet-header { grid-template-columns: 1fr; justify-items: center; text-align: center; } }
 
 .product-sheet-media { aspect-ratio: 1/1; width: 100%; background: #fff; display: flex; align-items: center; justify-content: center; padding: 10px; color: var(--gray); }
