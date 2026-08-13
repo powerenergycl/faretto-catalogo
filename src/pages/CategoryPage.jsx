@@ -57,6 +57,7 @@ export function CategoryPage({ productos, route, onNavigate }) {
         Inicio <b>/</b> {activeModelo ? <>{activeFamilyLabel} <b>/</b> Modelo {activeModelo}</> : (activeFamilyLabel || 'Catálogo Faretto')}
       </div>
       <h1 className="cat-title">{activeFamilyLabel || 'Catálogo Faretto'}</h1>
+      {activeModelo && <h2 className="cat-modelo-title">Modelo {activeModelo}</h2>}
 
       <div className={`cat-body ${activeFamily ? '' : 'cat-body-full'}`}>
         {activeFamily && (
@@ -83,8 +84,6 @@ export function CategoryPage({ productos, route, onNavigate }) {
         )}
 
         <div>
-          {activeModelo && <h2 className="cat-modelo-title">Modelo {activeModelo}</h2>}
-
           <div className="cat-description">
             Descripción de la categoría {activeFamilyLabel ? `"${activeFamilyLabel}"` : ''} (próximamente editable desde el admin).
           </div>
