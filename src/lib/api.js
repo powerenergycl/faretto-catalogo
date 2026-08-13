@@ -54,3 +54,162 @@ export function resolveModelo(nombre = '') {
   const match = nombre.match(MODELO_RULE);
   return match ? match[1].trim() : null;
 }
+
+// --- Agrupacion de fichas por modelo ---------------------------------------
+// El feed es plano por SKU, pero varios SKU de un mismo "Modelo" son en
+// realidad la misma pieza en distintas potencias/temperaturas de color (ver
+// ficha impresa de Faretto: 1 foto + 1 tabla de variantes, no una ficha por
+// SKU). Agrupar solo por "Modelo" no alcanza - un mismo modelo puede incluir
+// productos fisicamente distintos (ej. "Modelo Antares" trae tanto
+// ampolletas como bases de montaje). La clave real es
+// familia + modelo + nombre generico ya limpio de las palabras que varian
+// (potencia, temperatura, IP) - si dos nombres quedan iguales despues de
+// limpiarlos, son la misma pieza. Sin "Modelo" en el nombre no hay como
+// confirmar que dos productos sean variantes entre si, asi que esos quedan
+// siempre solos (nunca se agrupan por similitud de texto sola).
+const VARIANT_WORD_PATTERN = /\b(ip\d{2}|\d+(?:[.,]\d+)?\s*w|\d{3,4}\s*k|luz\s+(?:fría|fria|cálida|calida|neutra|neutro))\b/gi;
+
+function stripVariantWords(text = '') {
+  return text
+    .replace(VARIANT_WORD_PATTERN, ' ')
+    .replace(/\bfaretto\b/i, ' ')
+    .replace(/[-–—,]+$/, '')
+    .replace(/\s{2,}/g, ' ')
+    .trim();
+}
+
+function normalizeForKey(text) {
+  return String(text || '').normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase().trim();
+}
+
+// "Tipo de Luz" es redundante con Temperatura (mismo dato en palabras en vez
+// de Kelvin) - se descarta en vez de mostrarse dos veces.
+const SPEC_LABEL_HIDDEN = 'tipo de luz';
+const SPEC_LABEL_TEMPERATURA = 'temperatura';
+const SPEC_LABEL_POTENCIA = 'potencia';
+
+function getSpecValue(product, labelLower) {
+  const spec = (product.specs || []).find((item) => item.label.toLowerCase() === labelLower);
+  return spec ? spec.valor : null;
+}
+
+// Algunos valores traen el nombre del label repetido adentro (ej. Medidas:
+// "Medidas: Lampara Ø119x4,5mm...") - redundante al lado de una columna/
+// icono que ya dice "Medidas". Se limpia solo para mostrar, no toca el dato.
+export function cleanSpecValue(label = '', valor = '') {
+  const text = String(valor || '').trim();
+  const prefix = `${label}:`.toLowerCase();
+  return text.toLowerCase().startsWith(prefix) ? text.slice(prefix.length).trim() : text;
+}
+
+function parseLeadingNumber(valor) {
+  const match = String(valor || '').match(/(\d+(?:[.,]\d+)?)/);
+  return match ? Number(match[1].replace(',', '.')) : null;
+}
+
+function buildFichaFromGroup(group) {
+  const { members } = group;
+
+  // Specs presentes en TODOS los miembros con el mismo valor -> icono
+  // compartido, una sola vez arriba de la tabla. Lo que varia entre SKU va
+  // de columna en la tabla.
+  const allLabels = new Map();
+  members.forEach((product) => (product.specs || []).forEach((spec) => allLabels.set(spec.label.toLowerCase(), spec.label)));
+
+  const sharedSpecs = [];
+  const varyingLabels = [];
+  for (const [labelLower, label] of allLabels) {
+    if (labelLower === SPEC_LABEL_HIDDEN || labelLower === SPEC_LABEL_TEMPERATURA) continue;
+    const values = members.map((product) => getSpecValue(product, labelLower));
+    // Comparacion normalizada (case/espacios) - "6w" y "6W" son el mismo
+    // dato, no deberian contar como "varia entre SKU".
+    const allSame = values[0] !== null && values.every((valor) => normalizeForKey(valor) === normalizeForKey(values[0]));
+    if (allSame) {
+      sharedSpecs.push({ label, valor: values[0] });
+    } else {
+      varyingLabels.push(label);
+    }
+  }
+  // Potencia (si varia) define la fila - va primera en la tabla.
+  varyingLabels.sort((a, b) => {
+    if (a.toLowerCase() === SPEC_LABEL_POTENCIA) return -1;
+    if (b.toLowerCase() === SPEC_LABEL_POTENCIA) return 1;
+    return 0;
+  });
+
+  // Filas: mismo valor de Potencia = misma fila. Dentro de la fila, SKU y
+  // Temperatura se apilan (la unica dimension que se muestra apilada en vez
+  // de como columna propia, igual que en el catalogo impreso).
+  const rowsByPotencia = new Map();
+  for (const product of members) {
+    const potenciaValor = getSpecValue(product, SPEC_LABEL_POTENCIA) || '';
+    const rowKey = normalizeForKey(potenciaValor) || product.id;
+    if (!rowsByPotencia.has(rowKey)) {
+      rowsByPotencia.set(rowKey, { potenciaValor, watts: parseLeadingNumber(potenciaValor), items: [] });
+    }
+    rowsByPotencia.get(rowKey).items.push(product);
+  }
+
+  const rows = [...rowsByPotencia.values()]
+    .sort((a, b) => (a.watts ?? Infinity) - (b.watts ?? Infinity))
+    .map((row) => {
+      const items = [...row.items].sort((a, b) => (
+        (parseLeadingNumber(getSpecValue(b, SPEC_LABEL_TEMPERATURA)) ?? 0) - (parseLeadingNumber(getSpecValue(a, SPEC_LABEL_TEMPERATURA)) ?? 0)
+      ));
+      const values = {};
+      for (const label of varyingLabels) {
+        if (label.toLowerCase() === SPEC_LABEL_POTENCIA) { values[label] = row.potenciaValor; continue; }
+        values[label] = items.map((p) => getSpecValue(p, label.toLowerCase())).find(Boolean) || '';
+      }
+      return {
+        skus: items.map((p) => p.sku).filter(Boolean),
+        temperaturas: items.map((p) => getSpecValue(p, SPEC_LABEL_TEMPERATURA)).filter(Boolean),
+        values
+      };
+    });
+
+  return {
+    ...group,
+    sharedSpecs,
+    columns: varyingLabels,
+    hasTemperatura: members.some((product) => getSpecValue(product, SPEC_LABEL_TEMPERATURA)),
+    rows,
+    skuCount: members.length
+  };
+}
+
+export function buildProductGroups(productos = []) {
+  const groups = new Map();
+
+  for (const product of productos) {
+    const family = resolveFamily(product.nombre);
+    const modelo = resolveModelo(product.nombre);
+    let titulo;
+    let genericBase = null;
+    if (modelo) {
+      const nombreSinModelo = product.nombre.replace(MODELO_RULE, '').trim();
+      genericBase = stripVariantWords(nombreSinModelo) || nombreSinModelo;
+      titulo = `${genericBase} Modelo ${modelo}`;
+    } else {
+      titulo = product.nombre;
+    }
+    const key = modelo
+      ? `${family.id}::${normalizeForKey(modelo)}::${normalizeForKey(genericBase)}`
+      : `solo::${product.id}`;
+
+    if (!groups.has(key)) {
+      groups.set(key, {
+        key,
+        familyId: family.id,
+        modelo,
+        titulo,
+        imagen: product.imagen,
+        fichaTecnicaUrl: product.fichaTecnicaUrl,
+        members: []
+      });
+    }
+    groups.get(key).members.push(product);
+  }
+
+  return [...groups.values()].map(buildFichaFromGroup);
+}

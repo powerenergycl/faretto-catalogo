@@ -1,6 +1,6 @@
 import { useMemo, useState } from 'react';
 import { ProductCard } from '../components/ProductCard.jsx';
-import { FAMILIES, resolveFamily, resolveModelo } from '../lib/api.js';
+import { FAMILIES, resolveFamily, resolveModelo, buildProductGroups } from '../lib/api.js';
 
 const PAGE_SIZE = 24;
 
@@ -34,7 +34,10 @@ export function CategoryPage({ productos, route, onNavigate }) {
     return byFamily.filter((product) => resolveModelo(product.nombre) === activeModelo);
   }, [byFamily, activeModelo]);
 
-  const visible = filtered.slice(0, visibleCount);
+  // La ficha ahora es por "modelo" (1 foto + tabla de variantes), no por SKU
+  // - varios SKU del feed se agrupan en una sola ficha (ver buildProductGroups).
+  const fichas = useMemo(() => buildProductGroups(filtered), [filtered]);
+  const visible = fichas.slice(0, visibleCount);
   const activeFamilyLabel = FAMILIES.find((family) => family.id === activeFamily)?.label;
 
   function selectFamily(familyId) {
@@ -92,13 +95,13 @@ export function CategoryPage({ productos, route, onNavigate }) {
             <div className="state-box">No hay productos en esta familia todavía.</div>
           ) : (
             <div className="product-sheet-list">
-              {visible.map((product) => <ProductCard key={product.id} product={product} />)}
+              {visible.map((ficha) => <ProductCard key={ficha.key} ficha={ficha} />)}
             </div>
           )}
 
-          {visibleCount < filtered.length && (
+          {visibleCount < fichas.length && (
             <div className="pager">
-              <span>{visible.length} de {filtered.length}</span>
+              <span>{visible.length} de {fichas.length}</span>
               <button className="icon-btn" style={{ width: 'auto', borderRadius: 8, padding: '9px 14px' }} onClick={() => setVisibleCount((count) => count + PAGE_SIZE)}>
                 Cargar más
               </button>
