@@ -4,8 +4,15 @@ import { iconForSpec } from '../lib/specIcons.js';
 // Estilo "hoja de ficha tecnica" (ver faretto.cl): 1 bloque ancho por SKU,
 // apilados como indice - no grilla de cards chicas. Sin precio ni Cotizar,
 // solo specs + link a la ficha (decision explicita, replica el original).
+// Algunos atributos migrados de WooCommerce quedaron con el valor
+// enmascarado ("******") en vez del dato real - no hay nada que mostrar,
+// se ocultan en vez de imprimir asteriscos sueltos.
+function isMaskedValue(valor = '') {
+  return /^\*+$/.test(String(valor || '').trim());
+}
+
 export function ProductCard({ product }) {
-  const specs = product.specs || [];
+  const specs = (product.specs || []).filter((spec) => !isMaskedValue(spec.valor));
 
   return (
     <article className="product-sheet">
@@ -51,9 +58,7 @@ export function ProductCard({ product }) {
         </div>
       )}
 
-      <div className="product-sheet-footer">
-        <a href={`https://powerenergy.cl/producto/${product.slug}`} target="_blank" rel="noreferrer">Ver Ficha</a>
-      </div>
+      <div className="product-sheet-footer" />
     </article>
   );
 }
