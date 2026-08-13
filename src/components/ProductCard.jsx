@@ -1,4 +1,4 @@
-import { ImageOff } from 'lucide-react';
+import { ImageOff, Download } from 'lucide-react';
 import { iconForSpec } from '../lib/specIcons.js';
 
 // Estilo "hoja de ficha tecnica" (ver faretto.cl): 1 bloque ancho por SKU,
@@ -18,6 +18,11 @@ export function ProductCard({ product }) {
         <div className="product-sheet-heading">
           <span className="product-sheet-sku">SKU {product.sku || 'pendiente'}</span>
           <h2 className="product-sheet-name">{product.nombre}</h2>
+          {product.fichaTecnicaUrl && (
+            <a className="product-sheet-pdf" href={product.fichaTecnicaUrl} target="_blank" rel="noreferrer">
+              <Download size={14} /> Ficha técnica
+            </a>
+          )}
         </div>
       </div>
 
