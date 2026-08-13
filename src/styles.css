@@ -121,10 +121,10 @@ a:focus-visible, button:focus-visible, input:focus-visible {
 .filter-tree-sub button { font-size: 11.5px; padding: 5px 9px; }
 
 /* ---- product sheet (hoja tipo indice, ver faretto.cl - NO es galeria) ---- */
-.product-sheet-list { display: grid; }
+.product-sheet-list { display: grid; background: #fff; border: 1px solid #d7dce2; border-radius: 8px; box-shadow: 0 14px 32px rgba(1,102,102,0.06); padding: 0 20px; }
 .product-sheet { padding: 26px 4px; border-bottom: 1px solid var(--line); display: grid; gap: 18px; }
-.product-sheet:first-child { padding-top: 2px; }
-.product-sheet:last-child { border-bottom: 0; }
+.product-sheet:first-child { padding-top: 24px; }
+.product-sheet:last-child { border-bottom: 0; padding-bottom: 24px; }
 
 .product-sheet-header { display: grid; grid-template-columns: 190px 1fr; gap: 26px; align-items: center; }
 @media (max-width: 620px) { .product-sheet-header { grid-template-columns: 1fr; justify-items: center; text-align: center; } }
