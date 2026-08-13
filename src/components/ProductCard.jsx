@@ -85,8 +85,6 @@ export function ProductCard({ ficha }) {
           </table>
         </div>
       )}
-
-      <div className="product-sheet-footer" />
     </article>
   );
 }

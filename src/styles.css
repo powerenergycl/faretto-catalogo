@@ -104,9 +104,8 @@ a:focus-visible, button:focus-visible, input:focus-visible {
 .breadcrumb b { color: var(--teal); font-weight: 800; }
 .cat-title { font-size: 26px; font-weight: 800; color: var(--teal); margin-bottom: 16px; }
 
-.cat-modelo-title { font-size: 18px; font-weight: 800; color: var(--teal); margin: 0 0 14px; }
-
 .cat-description { margin: 0 0 22px; padding: 14px 16px; border-radius: 8px; background: #fff; border: 1px solid #d7dce2; color: var(--gray); font-size: 13px; line-height: 1.6; box-shadow: 0 14px 32px rgba(1,102,102,0.06); }
+.cat-description-modelo { text-align: center; font-size: 16px; font-weight: 800; color: var(--teal); text-transform: uppercase; letter-spacing: 0.02em; }
 
 .cat-body { display: grid; grid-template-columns: 250px 1fr; gap: 22px; align-items: start; }
 .cat-body.cat-body-full { grid-template-columns: 1fr; }
@@ -123,22 +122,22 @@ a:focus-visible, button:focus-visible, input:focus-visible {
 .filter-tree-sub button { font-size: 11.5px; padding: 5px 9px; }
 
 /* ---- product sheet (hoja tipo indice, ver faretto.cl - NO es galeria) ---- */
-.product-sheet-list { display: grid; background: #fff; border: 1px solid #d7dce2; border-radius: 8px; box-shadow: 0 14px 32px rgba(1,102,102,0.06); padding: 0 20px; }
-.product-sheet { padding: 26px 4px; border-bottom: 1px solid var(--line); display: grid; gap: 18px; }
-.product-sheet:first-child { padding-top: 4px; }
-.product-sheet:last-child { border-bottom: 0; padding-bottom: 24px; }
+/* Cada ficha es su propia caja cerrada (fondo, borde, sombra) con separacion
+   real entre una y la siguiente - ya no una sola caja continua con lineas
+   divisorias adentro. */
+.product-sheet-list { display: grid; gap: 22px; }
+.product-sheet { background: #fff; border: 1px solid #d7dce2; border-radius: 8px; box-shadow: 0 14px 32px rgba(1,102,102,0.06); padding: 24px 20px; display: grid; gap: 18px; }
 
-.product-sheet-header { display: grid; grid-template-columns: 190px 1fr; gap: 26px; align-items: start; }
+.product-sheet-header { display: grid; grid-template-columns: 190px 1fr; gap: 26px; align-items: center; }
 @media (max-width: 620px) { .product-sheet-header { grid-template-columns: 1fr; justify-items: center; text-align: center; } }
 
 .product-sheet-media { aspect-ratio: 1/1; width: 100%; background: #fff; display: flex; align-items: center; justify-content: center; padding: 10px; color: var(--gray); }
 .product-sheet-media img { max-width: 100%; max-height: 100%; object-fit: contain; }
 
-.product-sheet-heading { display: grid; gap: 8px; align-content: center; }
+.product-sheet-heading { display: grid; justify-items: center; align-content: center; gap: 10px; text-align: center; height: 100%; }
 .product-sheet-name { font-size: 19px; line-height: 1.3; color: var(--teal); font-weight: 800; text-transform: uppercase; margin: 0; }
-.product-sheet-pdf { justify-self: end; display: inline-flex; align-items: center; gap: 6px; font-size: 11px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.02em; color: var(--teal); border: 1px solid var(--teal); border-radius: 6px; padding: 7px 12px; text-decoration: none; }
+.product-sheet-pdf { display: inline-flex; align-items: center; gap: 6px; font-size: 11px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.02em; color: var(--teal); border: 1px solid var(--teal); border-radius: 6px; padding: 7px 12px; text-decoration: none; }
 .product-sheet-pdf:hover { background: var(--tint); }
-@media (max-width: 620px) { .product-sheet-pdf { justify-self: center; } }
 
 /* Tabla de variantes: suelta, a todo el ancho de la ficha (no al lado de la
    foto) - igual que en la ficha impresa. */
@@ -163,8 +162,6 @@ a:focus-visible, button:focus-visible, input:focus-visible {
 .product-sheet-spec .icon-circle { width: 38px; height: 38px; border-radius: 999px; background: var(--tint); color: var(--teal); display: grid; place-items: center; flex: none; }
 .product-sheet-spec span { font-size: 10px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.02em; color: var(--ink); }
 .product-sheet-spec strong { font-size: 11.5px; font-weight: 700; color: var(--teal); line-height: 1.25; overflow-wrap: break-word; }
-
-.product-sheet-footer { height: 3px; margin: 2px 0; border-radius: 999px; background: linear-gradient(90deg, transparent, var(--teal) 15%, var(--teal) 85%, transparent); }
 
 .pager { display: flex; align-items: center; justify-content: space-between; margin-top: 22px; font-size: 11.5px; color: #8a97a3; font-weight: 700; text-transform: uppercase; }
 
