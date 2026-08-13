@@ -117,6 +117,8 @@ a:focus-visible, button:focus-visible, input:focus-visible {
 .filter-tree button.active { background: var(--tint); color: var(--teal); font-weight: 800; }
 .filter-tree button.active .n { color: var(--teal); }
 .filter-tree button:hover:not(.active) { background: var(--tint-soft); color: var(--teal); }
+.filter-tree-sub { margin: 2px 0 4px 14px; padding-left: 8px; border-left: 2px solid var(--line); }
+.filter-tree-sub button { font-size: 11.5px; padding: 5px 9px; }
 
 /* ---- product sheet (hoja tipo indice, ver faretto.cl - NO es galeria) ---- */
 .product-sheet-list { display: grid; }

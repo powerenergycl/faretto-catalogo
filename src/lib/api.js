@@ -38,4 +38,19 @@ export function resolveFamily(nombre = '') {
   return match || { id: 'otros', label: 'Otros' };
 }
 
-export const FAMILIES = FAMILY_RULES.map(({ id, label }) => ({ id, label }));
+// "Otros" al final: cubre todo lo que no matchea ninguna regla de arriba
+// (ampolletas, apliques, bases, etc. - sitio_power todavia no expone estas
+// familias en el feed publico). Se muestra en el sidebar igual que las
+// demas para que ese ~60% del catalogo no quede inalcanzable salvo por
+// "Todas".
+export const FAMILIES = [...FAMILY_RULES.map(({ id, label }) => ({ id, label })), { id: 'otros', label: 'Otros' }];
+
+// El feed nombra el modelo al final del nombre ("... Faretto Modelo X") -
+// mismo patron en casi todo el catalogo. Se usa para el submenu de
+// modelos dentro de cada familia en el sidebar.
+const MODELO_RULE = /\bmodelo\s+(.+)$/i;
+
+export function resolveModelo(nombre = '') {
+  const match = nombre.match(MODELO_RULE);
+  return match ? match[1].trim() : null;
+}

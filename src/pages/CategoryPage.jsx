@@ -1,11 +1,13 @@
 import { useMemo, useState } from 'react';
 import { ProductCard } from '../components/ProductCard.jsx';
-import { FAMILIES, resolveFamily } from '../lib/api.js';
+import { FAMILIES, resolveFamily, resolveModelo } from '../lib/api.js';
 
 const PAGE_SIZE = 24;
 
 export function CategoryPage({ productos, route, onNavigate }) {
-  const activeFamily = new URLSearchParams(route.search).get('familia') || '';
+  const params = new URLSearchParams(route.search);
+  const activeFamily = params.get('familia') || '';
+  const activeModelo = params.get('modelo') || '';
   const [visibleCount, setVisibleCount] = useState(PAGE_SIZE);
 
   const familyCounts = useMemo(() => {
@@ -17,23 +19,54 @@ export function CategoryPage({ productos, route, onNavigate }) {
     return counts;
   }, [productos]);
 
-  const filtered = useMemo(() => {
+  const byFamily = useMemo(() => {
     if (!activeFamily) return productos;
     return productos.filter((product) => resolveFamily(product.nombre).id === activeFamily);
   }, [productos, activeFamily]);
 
+  // Submenu de modelos: solo tiene sentido dentro de una familia activa, y
+  // solo si al menos un producto de esa familia trae "Modelo X" en el
+  // nombre (varias familias, ej. cintas LED, nunca lo traen).
+  const modelos = useMemo(() => {
+    if (!activeFamily) return [];
+    const counts = new Map();
+    for (const product of byFamily) {
+      const modelo = resolveModelo(product.nombre);
+      if (!modelo) continue;
+      counts.set(modelo, (counts.get(modelo) || 0) + 1);
+    }
+    return [...counts.entries()].sort(([a], [b]) => a.localeCompare(b));
+  }, [byFamily, activeFamily]);
+
+  const filtered = useMemo(() => {
+    if (!activeModelo) return byFamily;
+    return byFamily.filter((product) => resolveModelo(product.nombre) === activeModelo);
+  }, [byFamily, activeModelo]);
+
   const visible = filtered.slice(0, visibleCount);
   const activeFamilyLabel = FAMILIES.find((family) => family.id === activeFamily)?.label;
+  const pageTitle = activeModelo && activeFamilyLabel ? `${activeFamilyLabel} · Modelo ${activeModelo}` : activeFamilyLabel;
 
   function selectFamily(familyId) {
     setVisibleCount(PAGE_SIZE);
     onNavigate(familyId ? `/catalogo?familia=${familyId}` : '/catalogo');
   }
 
+  function selectModelo(modelo) {
+    setVisibleCount(PAGE_SIZE);
+    if (modelo === activeModelo) {
+      onNavigate(`/catalogo?familia=${activeFamily}`);
+    } else {
+      onNavigate(`/catalogo?familia=${activeFamily}&modelo=${encodeURIComponent(modelo)}`);
+    }
+  }
+
   return (
     <>
-      <div className="breadcrumb">Inicio <b>/</b> {activeFamilyLabel || 'Catálogo Faretto'}</div>
-      <h1 className="cat-title">{activeFamilyLabel || 'Catálogo Faretto'}</h1>
+      <div className="breadcrumb">
+        Inicio <b>/</b> {activeModelo ? <>{activeFamilyLabel} <b>/</b> Modelo {activeModelo}</> : (activeFamilyLabel || 'Catálogo Faretto')}
+      </div>
+      <h1 className="cat-title">{pageTitle || 'Catálogo Faretto'}</h1>
       <p className="cat-desc">
         {filtered.length} producto{filtered.length === 1 ? '' : 's'} Faretto disponible{filtered.length === 1 ? '' : 's'}.
         Precios con stock verificado, sincronizados desde Power Energy por SKU.
@@ -49,13 +82,27 @@ export function CategoryPage({ productos, route, onNavigate }) {
               Todas <span className="n">{productos.length}</span>
             </button>
             {FAMILIES.map((family) => (
-              <button
-                key={family.id}
-                className={activeFamily === family.id ? 'active' : ''}
-                onClick={() => selectFamily(family.id)}
-              >
-                {family.label} <span className="n">{familyCounts.get(family.id) || 0}</span>
-              </button>
+              <div key={family.id}>
+                <button
+                  className={activeFamily === family.id ? 'active' : ''}
+                  onClick={() => selectFamily(family.id)}
+                >
+                  {family.label} <span className="n">{familyCounts.get(family.id) || 0}</span>
+                </button>
+                {activeFamily === family.id && modelos.length > 0 && (
+                  <div className="filter-tree filter-tree-sub">
+                    {modelos.map(([modelo, count]) => (
+                      <button
+                        key={modelo}
+                        className={activeModelo === modelo ? 'active' : ''}
+                        onClick={() => selectModelo(modelo)}
+                      >
+                        {modelo} <span className="n">{count}</span>
+                      </button>
+                    ))}
+                  </div>
+                )}
+              </div>
             ))}
           </div>
         </aside>
