@@ -36,7 +36,6 @@ export function CategoryPage({ productos, route, onNavigate }) {
 
   const visible = filtered.slice(0, visibleCount);
   const activeFamilyLabel = FAMILIES.find((family) => family.id === activeFamily)?.label;
-  const pageTitle = activeModelo && activeFamilyLabel ? `${activeFamilyLabel} · Modelo ${activeModelo}` : activeFamilyLabel;
 
   function selectFamily(familyId) {
     setVisibleCount(PAGE_SIZE);
@@ -57,11 +56,7 @@ export function CategoryPage({ productos, route, onNavigate }) {
       <div className="breadcrumb">
         Inicio <b>/</b> {activeModelo ? <>{activeFamilyLabel} <b>/</b> Modelo {activeModelo}</> : (activeFamilyLabel || 'Catálogo Faretto')}
       </div>
-      <h1 className="cat-title">{pageTitle || 'Catálogo Faretto'}</h1>
-
-      <div className="cat-description">
-        Descripción de la categoría {activeFamilyLabel ? `"${activeFamilyLabel}"` : ''} (próximamente editable desde el admin).
-      </div>
+      <h1 className="cat-title">{activeFamilyLabel || 'Catálogo Faretto'}</h1>
 
       <div className={`cat-body ${activeFamily ? '' : 'cat-body-full'}`}>
         {activeFamily && (
@@ -88,6 +83,12 @@ export function CategoryPage({ productos, route, onNavigate }) {
         )}
 
         <div>
+          {activeModelo && <h2 className="cat-modelo-title">Modelo {activeModelo}</h2>}
+
+          <div className="cat-description">
+            Descripción de la categoría {activeFamilyLabel ? `"${activeFamilyLabel}"` : ''} (próximamente editable desde el admin).
+          </div>
+
           {visible.length === 0 ? (
             <div className="state-box">No hay productos en esta familia todavía.</div>
           ) : (
