@@ -147,6 +147,8 @@ a:focus-visible, button:focus-visible, input:focus-visible {
 .product-sheet-table td { padding: 7px 10px; color: var(--ink); border-bottom: 1px dashed var(--line); vertical-align: top; }
 .product-sheet-table tr:last-child td { border-bottom: 0; }
 .product-sheet-table td div + div { margin-top: 2px; }
+.product-sheet-table tbody tr:nth-child(odd) { background: var(--tint-soft); }
+.product-sheet-table tbody tr:nth-child(even) { background: #fff; }
 
 .product-sheet-gallery { display: flex; gap: 8px; }
 .product-sheet-gallery-tile { aspect-ratio: 1/1; flex: 1 1 0; min-width: 0; background: var(--tint-soft); border: 1px solid var(--line); border-radius: 6px; display: grid; place-items: center; color: #9aa6bb; }
