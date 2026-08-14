@@ -101,6 +101,18 @@ function resolveLuzColor(valor = '') {
   return rule ? rule.color : null;
 }
 
+// La mayoria de los SKU no trae spec "Tipo de Luz" (solo algunos), pero
+// Temperatura (Kelvin) esta presente en casi todos - se deriva el color de
+// ahi como fuente principal. Rango sano 1500-10000K para descartar basura
+// como "3CCT" (luz ajustable, no tiene un solo color) o valores enmascarados.
+function resolveLuzColorFromKelvin(temperaturaValor = '') {
+  const kelvin = parseLeadingNumber(temperaturaValor);
+  if (kelvin === null || kelvin < 1500 || kelvin > 10000) return null;
+  if (kelvin <= 3200) return 'calida';
+  if (kelvin < 5000) return 'neutra';
+  return 'fria';
+}
+
 function getSpecValue(product, labelLower) {
   const spec = (product.specs || []).find((item) => item.label.toLowerCase() === labelLower);
   return spec ? spec.valor : null;
@@ -179,7 +191,11 @@ function buildFichaFromGroup(group) {
       // filtran juntos para que el punto de color quede alineado con su
       // temperatura, no con el indice del SKU.
       const temperaturaEntries = items
-        .map((p) => ({ temperatura: getSpecValue(p, SPEC_LABEL_TEMPERATURA), colorLuz: resolveLuzColor(getSpecValue(p, SPEC_LABEL_HIDDEN)) }))
+        .map((p) => {
+          const temperatura = getSpecValue(p, SPEC_LABEL_TEMPERATURA);
+          const colorLuz = resolveLuzColorFromKelvin(temperatura) || resolveLuzColor(getSpecValue(p, SPEC_LABEL_HIDDEN));
+          return { temperatura, colorLuz };
+        })
         .filter((entry) => entry.temperatura);
       return {
         skus: items.map((p) => p.sku).filter(Boolean),
