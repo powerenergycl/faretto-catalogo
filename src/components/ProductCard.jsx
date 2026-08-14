@@ -15,6 +15,10 @@ export function ProductCard({ ficha }) {
   const sharedSpecs = (ficha.sharedSpecs || []).filter((spec) => !isMaskedValue(spec.valor));
   const columns = ficha.columns || [];
   const rows = ficha.rows || [];
+  // Cada Potencia trae su propio PDF (ej. 12W y 18W del mismo modelo tienen
+  // fichas distintas) - el boton va por fila, no una vez arriba de toda la
+  // tarjeta.
+  const hasFichaTecnica = rows.some((row) => row.fichaTecnicaUrl);
 
   return (
     <article className="product-sheet">
@@ -26,11 +30,6 @@ export function ProductCard({ ficha }) {
         </div>
         <div className="product-sheet-heading">
           <h2 className="product-sheet-name">{ficha.titulo}</h2>
-          {ficha.fichaTecnicaUrl && (
-            <a className="product-sheet-pdf" href={ficha.fichaTecnicaUrl} target="_blank" rel="noreferrer">
-              <Download size={14} /> Ficha técnica
-            </a>
-          )}
         </div>
       </div>
 
@@ -67,6 +66,7 @@ export function ProductCard({ ficha }) {
                 <th>SKU</th>
                 {columns.map((label) => <th key={label}>{label}</th>)}
                 {ficha.hasTemperatura && <th>Temperatura</th>}
+                {hasFichaTecnica && <th>Ficha Técnica</th>}
               </tr>
             </thead>
             <tbody>
@@ -74,7 +74,7 @@ export function ProductCard({ ficha }) {
                 <tr key={row.skus.join('-')}>
                   <td>{row.skus.map((sku) => <div key={sku}>{sku}</div>)}</td>
                   {columns.map((label) => (
-                    <td key={label}>{cleanSpecValue(label, row.values[label])}</td>
+                    <td className="product-sheet-table-value" key={label}>{cleanSpecValue(label, row.values[label])}</td>
                   ))}
                   {ficha.hasTemperatura && (
                     <td>
@@ -89,6 +89,15 @@ export function ProductCard({ ficha }) {
                           </div>
                         );
                       })}
+                    </td>
+                  )}
+                  {hasFichaTecnica && (
+                    <td className="product-sheet-table-value">
+                      {row.fichaTecnicaUrl && (
+                        <a className="product-sheet-pdf" href={row.fichaTecnicaUrl} target="_blank" rel="noreferrer">
+                          <Download size={14} /> Ficha técnica
+                        </a>
+                      )}
                     </td>
                   )}
                 </tr>

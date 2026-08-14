@@ -201,7 +201,12 @@ function buildFichaFromGroup(group) {
         skus: items.map((p) => p.sku).filter(Boolean),
         temperaturas: temperaturaEntries.map((entry) => entry.temperatura),
         coloresLuz: temperaturaEntries.map((entry) => entry.colorLuz),
-        values
+        values,
+        // Cada Potencia tiene su propio PDF (distinto SKU = misma ficha
+        // dentro de una fila, ej. 3100/3101/3102 comparten el PDF de 12W) -
+        // el boton de descarga va por fila, no una vez arriba de toda la
+        // tarjeta.
+        fichaTecnicaUrl: items.map((p) => p.fichaTecnicaUrl).find(Boolean) || null
       };
     });
 
@@ -241,7 +246,6 @@ export function buildProductGroups(productos = []) {
         modelo,
         titulo,
         imagen: product.imagen,
-        fichaTecnicaUrl: product.fichaTecnicaUrl,
         members: []
       });
     }
