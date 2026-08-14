@@ -5,7 +5,7 @@ import { cleanSpecValue } from '../lib/api.js';
 // Ficha "por modelo" (ver catalogo impreso de Faretto): 1 foto + 1 titulo
 // generico representan a todos los SKU que son la misma pieza en distintas
 // potencias/temperaturas de color (agrupados en lib/api.js#buildProductGroups).
-// Orden: foto+titulo arriba, iconos de specs compartidos, galeria de fotos,
+// Orden: foto+titulo arriba, galeria de fotos, iconos de specs compartidos,
 // tabla de variantes suelta a todo el ancho al final.
 function isMaskedValue(valor = '') {
   return /^\*+$/.test(String(valor || '').trim());
@@ -37,6 +37,16 @@ export function ProductCard({ ficha }) {
         </div>
       </div>
 
+      {/* Galeria de fotos del producto (instalacion, detalle, empaque, etc.) -
+          contenido pendiente de admin, por ahora placeholders 1:1. */}
+      <div className="product-sheet-gallery">
+        {Array.from({ length: 6 }).map((_, i) => (
+          <div className="product-sheet-gallery-tile" key={i}>
+            <ImageOff size={18} />
+          </div>
+        ))}
+      </div>
+
       {sharedSpecs.length > 0 && (
         <div className="product-sheet-specs">
           {sharedSpecs.map((spec) => {
@@ -51,16 +61,6 @@ export function ProductCard({ ficha }) {
           })}
         </div>
       )}
-
-      {/* Galeria de fotos del producto (instalacion, detalle, empaque, etc.) -
-          contenido pendiente de admin, por ahora placeholders 1:1. */}
-      <div className="product-sheet-gallery">
-        {Array.from({ length: 6 }).map((_, i) => (
-          <div className="product-sheet-gallery-tile" key={i}>
-            <ImageOff size={18} />
-          </div>
-        ))}
-      </div>
 
       {rows.length > 0 && (
         <div className="product-sheet-table-wrap">
