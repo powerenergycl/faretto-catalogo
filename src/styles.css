@@ -130,11 +130,11 @@ a:focus-visible, button:focus-visible, input:focus-visible {
 
 /* Circulo con el color de luz (solo si todo el grupo de SKU comparte el
    mismo color - si varia entre filas no hay un solo color que mostrar). */
-.product-sheet-luz-circle { position: absolute; top: 14px; right: 14px; width: 56px; height: 56px; border-radius: 999px; border: 3px solid #fff; box-shadow: 0 4px 12px rgba(0,0,0,0.14), inset 0 0 10px rgba(0,0,0,0.06); pointer-events: none; }
-.product-sheet-luz-circle.luz-calida { background: radial-gradient(circle at 32% 28%, #fff4d6, #ffb238 72%, #f08a1c); }
-.product-sheet-luz-circle.luz-neutra { background: radial-gradient(circle at 32% 28%, #fffdf5, #ffe9b8 72%, #f2cf82); }
-.product-sheet-luz-circle.luz-fria { background: radial-gradient(circle at 32% 28%, #f2fbff, #bfe3ff 72%, #8fc9ee); }
-@media (max-width: 620px) { .product-sheet-luz-circle { width: 42px; height: 42px; top: 10px; right: 10px; border-width: 2px; } }
+.product-sheet-temp-line { display: flex; align-items: center; gap: 5px; }
+.product-sheet-luz-dot { flex-shrink: 0; width: 10px; height: 10px; border-radius: 999px; border: 1px solid rgba(0,0,0,0.15); box-shadow: inset 0 0 2px rgba(0,0,0,0.12); }
+.product-sheet-luz-dot.luz-calida { background: radial-gradient(circle at 32% 28%, #fff4d6, #ffb238 72%, #f08a1c); }
+.product-sheet-luz-dot.luz-neutra { background: radial-gradient(circle at 32% 28%, #fffdf5, #ffe9b8 72%, #f2cf82); }
+.product-sheet-luz-dot.luz-fria { background: radial-gradient(circle at 32% 28%, #f2fbff, #bfe3ff 72%, #8fc9ee); }
 
 .product-sheet-header { display: grid; grid-template-columns: 190px 1fr; gap: 26px; align-items: center; }
 @media (max-width: 620px) { .product-sheet-header { grid-template-columns: 1fr; justify-items: center; text-align: center; } }

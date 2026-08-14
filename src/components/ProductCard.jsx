@@ -18,9 +18,6 @@ export function ProductCard({ ficha }) {
 
   return (
     <article className="product-sheet">
-      {ficha.colorLuz && (
-        <span className={`product-sheet-luz-circle luz-${ficha.colorLuz}`} title={`Luz ${ficha.colorLuz}`} aria-hidden="true" />
-      )}
       <div className="product-sheet-header">
         <div className="product-sheet-media">
           {ficha.imagen ? (
@@ -80,7 +77,19 @@ export function ProductCard({ ficha }) {
                     <td key={label}>{cleanSpecValue(label, row.values[label])}</td>
                   ))}
                   {ficha.hasTemperatura && (
-                    <td>{row.temperaturas.map((temperatura, i) => <div key={i}>{temperatura}</div>)}</td>
+                    <td>
+                      {row.temperaturas.map((temperatura, i) => {
+                        const colorLuz = row.coloresLuz?.[i];
+                        return (
+                          <div className="product-sheet-temp-line" key={i}>
+                            {colorLuz && (
+                              <span className={`product-sheet-luz-dot luz-${colorLuz}`} title={`Luz ${colorLuz}`} aria-hidden="true" />
+                            )}
+                            {temperatura}
+                          </div>
+                        );
+                      })}
+                    </td>
                   )}
                 </tr>
               ))}

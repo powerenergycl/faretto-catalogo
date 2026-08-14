@@ -174,18 +174,20 @@ function buildFichaFromGroup(group) {
         if (label.toLowerCase() === SPEC_LABEL_POTENCIA) { values[label] = row.potenciaValor; continue; }
         values[label] = items.map((p) => getSpecValue(p, label.toLowerCase())).find(Boolean) || '';
       }
+      // Temperatura y color de luz van pegados (el color se deriva de "Tipo
+      // de Luz", que es el mismo dato que Temperatura pero en palabras) - se
+      // filtran juntos para que el punto de color quede alineado con su
+      // temperatura, no con el indice del SKU.
+      const temperaturaEntries = items
+        .map((p) => ({ temperatura: getSpecValue(p, SPEC_LABEL_TEMPERATURA), colorLuz: resolveLuzColor(getSpecValue(p, SPEC_LABEL_HIDDEN)) }))
+        .filter((entry) => entry.temperatura);
       return {
         skus: items.map((p) => p.sku).filter(Boolean),
-        temperaturas: items.map((p) => getSpecValue(p, SPEC_LABEL_TEMPERATURA)).filter(Boolean),
+        temperaturas: temperaturaEntries.map((entry) => entry.temperatura),
+        coloresLuz: temperaturaEntries.map((entry) => entry.colorLuz),
         values
       };
     });
-
-  // Color de luz para el circulo de la ficha: solo si TODO el grupo
-  // comparte el mismo color (si hay Fria y Calida mezcladas en la misma
-  // ficha, no hay un solo circulo que la represente correctamente).
-  const luzColors = members.map((product) => resolveLuzColor(getSpecValue(product, SPEC_LABEL_HIDDEN)));
-  const colorLuz = luzColors[0] && luzColors.every((color) => color === luzColors[0]) ? luzColors[0] : null;
 
   return {
     ...group,
@@ -193,8 +195,7 @@ function buildFichaFromGroup(group) {
     columns: varyingLabels,
     hasTemperatura: members.some((product) => getSpecValue(product, SPEC_LABEL_TEMPERATURA)),
     rows,
-    skuCount: members.length,
-    colorLuz
+    skuCount: members.length
   };
 }
 
