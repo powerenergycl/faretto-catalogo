@@ -82,10 +82,10 @@ export function ProductCard({ ficha }) {
                         const colorLuz = row.coloresLuz?.[i];
                         return (
                           <div className="product-sheet-temp-line" key={i}>
+                            {temperatura}
                             {colorLuz && (
                               <span className={`product-sheet-luz-dot luz-${colorLuz}`} title={`Luz ${colorLuz}`} aria-hidden="true" />
                             )}
-                            {temperatura}
                           </div>
                         );
                       })}
