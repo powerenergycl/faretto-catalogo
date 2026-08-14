@@ -18,6 +18,9 @@ export function ProductCard({ ficha }) {
 
   return (
     <article className="product-sheet">
+      {ficha.colorLuz && (
+        <span className={`product-sheet-luz-circle luz-${ficha.colorLuz}`} title={`Luz ${ficha.colorLuz}`} aria-hidden="true" />
+      )}
       <div className="product-sheet-header">
         <div className="product-sheet-media">
           {ficha.imagen ? (

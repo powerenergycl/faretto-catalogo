@@ -88,6 +88,19 @@ const SPEC_LABEL_HIDDEN = 'tipo de luz';
 const SPEC_LABEL_TEMPERATURA = 'temperatura';
 const SPEC_LABEL_POTENCIA = 'potencia';
 
+// Color de luz para el circulo de la ficha - solo las 3 categorias fijas
+// tienen un color representativo; "RGB" y valores raros/enmascarados no.
+const LUZ_COLOR_RULES = [
+  { test: /c[aá]lida/i, color: 'calida' },
+  { test: /fr[ií]a/i, color: 'fria' },
+  { test: /neutr[oa]/i, color: 'neutra' }
+];
+
+function resolveLuzColor(valor = '') {
+  const rule = LUZ_COLOR_RULES.find(({ test }) => test.test(valor));
+  return rule ? rule.color : null;
+}
+
 function getSpecValue(product, labelLower) {
   const spec = (product.specs || []).find((item) => item.label.toLowerCase() === labelLower);
   return spec ? spec.valor : null;
@@ -168,13 +181,20 @@ function buildFichaFromGroup(group) {
       };
     });
 
+  // Color de luz para el circulo de la ficha: solo si TODO el grupo
+  // comparte el mismo color (si hay Fria y Calida mezcladas en la misma
+  // ficha, no hay un solo circulo que la represente correctamente).
+  const luzColors = members.map((product) => resolveLuzColor(getSpecValue(product, SPEC_LABEL_HIDDEN)));
+  const colorLuz = luzColors[0] && luzColors.every((color) => color === luzColors[0]) ? luzColors[0] : null;
+
   return {
     ...group,
     sharedSpecs,
     columns: varyingLabels,
     hasTemperatura: members.some((product) => getSpecValue(product, SPEC_LABEL_TEMPERATURA)),
     rows,
-    skuCount: members.length
+    skuCount: members.length,
+    colorLuz
   };
 }
 
