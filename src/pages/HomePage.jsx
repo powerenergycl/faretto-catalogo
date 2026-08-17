@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { Image, Newspaper } from 'lucide-react';
 import { fetchFarettoAccesos, FAMILIES, resolveFamily } from '../lib/api.js';
-import { iconForAccess } from '../lib/accessIcons.js';
+import { AccessIcon } from '../lib/accessIcons.jsx';
 
 // Accesos directos (franja de circulos con conteo por familia, debajo de los
 // 9 botones) - pedido explicito: ocultar por ahora, se retoma mas adelante.
@@ -13,16 +13,18 @@ const SHOW_ACCESOS_DIRECTOS = false;
 // (Power Admin > sitio Faretto > Accesos destacados). Esta lista fija es
 // solo el respaldo mientras no haya ninguno cargado ahi, o si el fetch
 // falla - la seccion nunca debe quedar vacia.
+// Nombres en kebab-case: mismo formato que usa el admin (ver
+// src/lib/accessIcons.js y https://lucide.dev/icons).
 const FALLBACK_QUICKLINKS = [
-  { nombre: 'Plafones', icono: 'Lightbulb', url_destino: '/catalogo?familia=plafones' },
-  { nombre: 'Luminaria pública', icono: 'MapPin', url_destino: '/catalogo?familia=luminaria-publica' },
-  { nombre: 'Cintas LED', icono: 'Cable', url_destino: '/catalogo?familia=cintas-led' },
-  { nombre: 'Paneles LED', icono: 'LayoutGrid', url_destino: '/catalogo?familia=paneles-led' },
-  { nombre: 'Focos', icono: 'Flashlight', url_destino: '/catalogo?familia=focos' },
-  { nombre: 'Tubos y otros', icono: 'Zap', url_destino: '/catalogo?familia=tubos' },
-  { nombre: 'Catálogo completo', icono: 'LayoutList', url_destino: '/catalogo' },
-  { nombre: 'Cotizar por WhatsApp', icono: 'MessageCircle', url_destino: 'https://wa.me/' },
-  { nombre: 'Power Energy', icono: 'Building2', url_destino: 'https://powerenergy.cl' }
+  { nombre: 'Plafones', icono: 'lightbulb', url_destino: '/catalogo?familia=plafones' },
+  { nombre: 'Luminaria pública', icono: 'map-pin', url_destino: '/catalogo?familia=luminaria-publica' },
+  { nombre: 'Cintas LED', icono: 'cable', url_destino: '/catalogo?familia=cintas-led' },
+  { nombre: 'Paneles LED', icono: 'layout-grid', url_destino: '/catalogo?familia=paneles-led' },
+  { nombre: 'Focos', icono: 'flashlight', url_destino: '/catalogo?familia=focos' },
+  { nombre: 'Tubos y otros', icono: 'zap', url_destino: '/catalogo?familia=tubos' },
+  { nombre: 'Catálogo completo', icono: 'layout-list', url_destino: '/catalogo' },
+  { nombre: 'Cotizar por WhatsApp', icono: 'message-circle', url_destino: 'https://wa.me/' },
+  { nombre: 'Power Energy', icono: 'building-2', url_destino: 'https://powerenergy.cl' }
 ];
 
 // Mosaico de banners: mismo lenguaje de zonas que home-banner-mosaic en
@@ -44,7 +46,6 @@ const BANNERS = [
 const BLOG_PLACEHOLDER_COUNT = 5;
 
 function QuickLink({ nombre, icono, url_destino, onNavigate }) {
-  const Icon = iconForAccess(icono);
   const external = /^https?:\/\//i.test(url_destino || '');
   return (
     <a
@@ -54,7 +55,7 @@ function QuickLink({ nombre, icono, url_destino, onNavigate }) {
       rel={external ? 'noreferrer' : undefined}
       onClick={external ? undefined : (event) => { event.preventDefault(); onNavigate(url_destino); }}
     >
-      <Icon size={18} />
+      <AccessIcon name={icono} size={18} />
       <span>{nombre}</span>
     </a>
   );
