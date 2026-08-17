@@ -1,33 +1,28 @@
-import {
-  Lightbulb, MapPin, Cable, LayoutGrid, Flashlight, Zap,
-  LayoutList, MessageCircle, Building2, Image, Newspaper
-} from 'lucide-react';
-import { FAMILIES, resolveFamily } from '../lib/api.js';
+import { useEffect, useState } from 'react';
+import { Image, Newspaper } from 'lucide-react';
+import { fetchFarettoAccesos, FAMILIES, resolveFamily } from '../lib/api.js';
+import { iconForAccess } from '../lib/accessIcons.js';
 
-// Un producto de muestra por familia para el thumbnail circular - toma el
-// primero que matchee en la lista ya cargada, así no depende de imagenes
-// fijas en el repo ni de un endpoint aparte.
-function pickFamilyThumbnails(productos) {
-  return FAMILIES.map((family) => {
-    const sample = productos.find((product) => resolveFamily(product.nombre).id === family.id && product.imagen);
-    const count = productos.filter((product) => resolveFamily(product.nombre).id === family.id).length;
-    return { ...family, imagen: sample?.imagen || null, count };
-  });
-}
+// Accesos directos (franja de circulos con conteo por familia, debajo de los
+// 9 botones) - pedido explicito: ocultar por ahora, se retoma mas adelante.
+// No se borro el codigo que los arma (mas abajo, sin usar) para no perder el
+// trabajo cuando se reactiven.
+const SHOW_ACCESOS_DIRECTOS = false;
 
-// 9 accesos (grilla 3x3): las 6 familias del catálogo + 3 atajos generales.
-// Textos/orden son un borrador razonable, no lo definido en papel todavía -
-// se pueden reemplazar sin tocar la grilla ni el layout.
-const QUICKLINKS = [
-  { icon: Lightbulb, label: 'Plafones', href: '/catalogo?familia=plafones' },
-  { icon: MapPin, label: 'Luminaria pública', href: '/catalogo?familia=luminaria-publica' },
-  { icon: Cable, label: 'Cintas LED', href: '/catalogo?familia=cintas-led' },
-  { icon: LayoutGrid, label: 'Paneles LED', href: '/catalogo?familia=paneles-led' },
-  { icon: Flashlight, label: 'Focos', href: '/catalogo?familia=focos' },
-  { icon: Zap, label: 'Tubos y otros', href: '/catalogo?familia=tubos' },
-  { icon: LayoutList, label: 'Catálogo completo', href: '/catalogo' },
-  { icon: MessageCircle, label: 'Cotizar por WhatsApp', href: 'https://wa.me/', external: true },
-  { icon: Building2, label: 'Power Energy', href: 'https://powerenergy.cl', external: true }
+// Accesos destacados (grilla 3x3): ahora administrables desde sitio_power
+// (Power Admin > sitio Faretto > Accesos destacados). Esta lista fija es
+// solo el respaldo mientras no haya ninguno cargado ahi, o si el fetch
+// falla - la seccion nunca debe quedar vacia.
+const FALLBACK_QUICKLINKS = [
+  { nombre: 'Plafones', icono: 'Lightbulb', url_destino: '/catalogo?familia=plafones' },
+  { nombre: 'Luminaria pública', icono: 'MapPin', url_destino: '/catalogo?familia=luminaria-publica' },
+  { nombre: 'Cintas LED', icono: 'Cable', url_destino: '/catalogo?familia=cintas-led' },
+  { nombre: 'Paneles LED', icono: 'LayoutGrid', url_destino: '/catalogo?familia=paneles-led' },
+  { nombre: 'Focos', icono: 'Flashlight', url_destino: '/catalogo?familia=focos' },
+  { nombre: 'Tubos y otros', icono: 'Zap', url_destino: '/catalogo?familia=tubos' },
+  { nombre: 'Catálogo completo', icono: 'LayoutList', url_destino: '/catalogo' },
+  { nombre: 'Cotizar por WhatsApp', icono: 'MessageCircle', url_destino: 'https://wa.me/' },
+  { nombre: 'Power Energy', icono: 'Building2', url_destino: 'https://powerenergy.cl' }
 ];
 
 // Mosaico de banners: mismo lenguaje de zonas que home-banner-mosaic en
@@ -48,17 +43,19 @@ const BANNERS = [
 // se deja la grilla de 5 lista para mapear articulos reales mas adelante.
 const BLOG_PLACEHOLDER_COUNT = 5;
 
-function QuickLink({ icon: Icon, label, href, external, onNavigate }) {
+function QuickLink({ nombre, icono, url_destino, onNavigate }) {
+  const Icon = iconForAccess(icono);
+  const external = /^https?:\/\//i.test(url_destino || '');
   return (
     <a
       className="home-quicklink"
-      href={href}
+      href={url_destino || '#'}
       target={external ? '_blank' : undefined}
       rel={external ? 'noreferrer' : undefined}
-      onClick={external ? undefined : (event) => { event.preventDefault(); onNavigate(href); }}
+      onClick={external ? undefined : (event) => { event.preventDefault(); onNavigate(url_destino); }}
     >
       <Icon size={18} />
-      <span>{label}</span>
+      <span>{nombre}</span>
     </a>
   );
 }
@@ -79,11 +76,17 @@ function BannerTile({ zone, href, imagen }) {
 }
 
 export function HomePage({ productos, dataStatus = 'ready', onNavigate }) {
-  const familyThumbnails = pickFamilyThumbnails(productos);
-  // La franja de familias depende del feed de productos (imagen + conteo
-  // por familia) - si todavia no respondio o fallo, se omite en vez de
-  // mostrar circulos vacios con "(0)".
-  const showFamilyStrip = dataStatus === 'ready' && productos.length > 0;
+  const [accesos, setAccesos] = useState(null); // null = todavia no respondio
+
+  useEffect(() => {
+    let cancelled = false;
+    fetchFarettoAccesos()
+      .then((items) => { if (!cancelled) setAccesos(items); })
+      .catch(() => { if (!cancelled) setAccesos([]); });
+    return () => { cancelled = true; };
+  }, []);
+
+  const quicklinks = accesos && accesos.length > 0 ? accesos : FALLBACK_QUICKLINKS;
 
   return (
     <>
@@ -92,27 +95,13 @@ export function HomePage({ productos, dataStatus = 'ready', onNavigate }) {
         <h2>Accesos destacados</h2>
       </div>
       <div className="home-quicklinks">
-        {QUICKLINKS.map((link) => (
-          <QuickLink key={link.label} {...link} onNavigate={onNavigate} />
+        {quicklinks.map((link) => (
+          <QuickLink key={link.nombre} {...link} onNavigate={onNavigate} />
         ))}
       </div>
 
-      {showFamilyStrip && (
-        <div className="round-category-strip">
-          {familyThumbnails.map((family) => (
-            <a
-              key={family.id}
-              className="round-category"
-              href={`/catalogo?familia=${family.id}`}
-              onClick={(event) => { event.preventDefault(); onNavigate(`/catalogo?familia=${family.id}`); }}
-            >
-              <span>
-                {family.imagen ? <img src={family.imagen} alt={family.label} /> : null}
-              </span>
-              <strong>{family.label} ({family.count})</strong>
-            </a>
-          ))}
-        </div>
+      {SHOW_ACCESOS_DIRECTOS && (
+        <FamilyStrip productos={productos} dataStatus={dataStatus} onNavigate={onNavigate} />
       )}
 
       <div className="home-seo-intro">
@@ -151,5 +140,38 @@ export function HomePage({ productos, dataStatus = 'ready', onNavigate }) {
         ))}
       </div>
     </>
+  );
+}
+
+// Franja de circulos con conteo por familia (ver SHOW_ACCESOS_DIRECTOS) -
+// depende de FAMILIES/resolveFamily y del feed de productos ya cargado, sin
+// import aparte. Se separo a su propio componente para que quede fuera del
+// camino cuando esta apagada, sin tener que borrarla.
+function FamilyStrip({ productos, dataStatus, onNavigate }) {
+  const showFamilyStrip = dataStatus === 'ready' && productos.length > 0;
+  if (!showFamilyStrip) return null;
+
+  const familyThumbnails = FAMILIES.map((family) => {
+    const sample = productos.find((product) => resolveFamily(product.nombre).id === family.id && product.imagen);
+    const count = productos.filter((product) => resolveFamily(product.nombre).id === family.id).length;
+    return { ...family, imagen: sample?.imagen || null, count };
+  });
+
+  return (
+    <div className="round-category-strip">
+      {familyThumbnails.map((family) => (
+        <a
+          key={family.id}
+          className="round-category"
+          href={`/catalogo?familia=${family.id}`}
+          onClick={(event) => { event.preventDefault(); onNavigate(`/catalogo?familia=${family.id}`); }}
+        >
+          <span>
+            {family.imagen ? <img src={family.imagen} alt={family.label} /> : null}
+          </span>
+          <strong>{family.label} ({family.count})</strong>
+        </a>
+      ))}
+    </div>
   );
 }

@@ -16,6 +16,19 @@ export async function fetchFarettoProductos() {
   return Array.isArray(data.productos) ? data.productos : [];
 }
 
+// Accesos destacados del home: administrables desde el panel de sitio_power
+// (Power Admin > sitio Faretto > Accesos destacados). Si el fetch falla o
+// todavia no hay ninguno cargado, HomePage cae a una lista fija propia -
+// nunca debe quedar la seccion vacia.
+export async function fetchFarettoAccesos() {
+  const response = await fetch(`${API_BASE}/api/public/faretto-accesos`);
+  if (!response.ok) {
+    throw new Error(`No se pudieron cargar los accesos (HTTP ${response.status})`);
+  }
+  const data = await response.json();
+  return Array.isArray(data.items) ? data.items : Array.isArray(data) ? data : [];
+}
+
 export function formatPrice(value) {
   if (value === null || value === undefined) return 'Consultar';
   return Number(value).toLocaleString('es-CL', { style: 'currency', currency: 'CLP', maximumFractionDigits: 0 });
