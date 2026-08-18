@@ -87,7 +87,11 @@ a:focus-visible, button:focus-visible, input:focus-visible {
    mas alta de lo que su propio ratio pide, dejando un hueco vacio debajo
    de la imagen (object-fit: contain la centra en esa altura de mas). */
 .home-banner-tile { position: relative; border-radius: 8px; overflow: hidden; background: var(--tint-soft); border: 1px dashed var(--line-soft); display: grid; place-items: center; color: #9aa6bb; align-self: start; }
-.home-banner-tile.wide { grid-column: span 2; aspect-ratio: 2 / 1; }
+/* 3/2 (no 2/1): con 4 columnas iguales, un vertical de 1 columna a 3:4 da una
+   altura de 1.33x el ancho de columna. Para que el tile ancho (2 columnas)
+   llegue a esa misma altura sin estirarlo (eso fue el bug del "hueco" que se
+   corrigio con align-self:start), su propia proporcion debe ser 3:2. */
+.home-banner-tile.wide { grid-column: span 2; aspect-ratio: 3 / 2; }
 .home-banner-tile.vertical { aspect-ratio: 3 / 4; }
 .home-banner-tile.square { aspect-ratio: 1 / 1; }
 .home-banner-tile img { width: 100%; height: 100%; object-fit: cover; }
@@ -100,6 +104,14 @@ a:focus-visible, button:focus-visible, input:focus-visible {
 .home-banner-tile.has-product { background: #fff; border-style: solid; }
 .home-banner-tile.has-product img { object-fit: contain; padding: 14px 14px 54px; }
 .home-banner-tile.has-product:hover img { transform: scale(1.03); transition: transform 200ms ease; }
+
+/* Banner real cargado desde el admin (ver ImageBannerTile) - sin caption
+   superpuesta ni padding reservado para ella (eso es solo de has-product,
+   el relleno de productos). El object-fit real lo decide inline el "ajuste
+   imagen" del admin (cover por defecto); esta regla solo pasa el borde de
+   placeholder punteado a solido una vez que hay imagen cargada. */
+.home-banner-tile.has-banner-image { background: #fff; border-style: solid; }
+.home-banner-tile.has-banner-image:hover img { transform: scale(1.03); transition: transform 200ms ease; }
 .home-banner-product-caption {
   position: absolute; left: 0; right: 0; bottom: 0; padding: 8px 12px 10px;
   background: linear-gradient(0deg, #fff 55%, rgba(255,255,255,0));

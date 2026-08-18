@@ -154,13 +154,18 @@ function ImageBannerTile({ zone, tile, onNavigate }) {
 
   return (
     <a
-      className={`home-banner-tile has-product ${zone}`}
+      className={`home-banner-tile has-banner-image ${zone}`}
       href={href || '#'}
       target={external ? '_blank' : undefined}
       rel={external ? 'noreferrer' : undefined}
       onClick={href && !external ? (event) => { event.preventDefault(); onNavigate(href); } : undefined}
     >
-      <img src={tile.imagen_url} alt={tile.alt || tile.titulo || ''} loading="lazy" />
+      <img
+        src={tile.imagen_url}
+        alt={tile.alt || tile.titulo || ''}
+        loading="lazy"
+        style={{ objectFit: tile.metadata?.image_fit || 'cover' }}
+      />
     </a>
   );
 }
