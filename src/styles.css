@@ -87,6 +87,28 @@ a:focus-visible, button:focus-visible, input:focus-visible {
 .home-banner-tile.square { aspect-ratio: 1 / 1; }
 .home-banner-tile img { width: 100%; height: 100%; object-fit: cover; }
 .home-banner-tile .placeholder { display: grid; justify-items: center; gap: 6px; font-size: 10px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.04em; }
+
+/* Relleno temporal con productos reales (sin precio) mientras no hay CMS de
+   banners - ver BannersSection en HomePage.jsx. Foto en "contain" (son
+   renders de producto sobre fondo blanco, no fotografia de ambiente, "cover"
+   los recortaria mal) con una franja de texto pegada abajo. */
+.home-banner-tile.has-product { background: #fff; border-style: solid; }
+.home-banner-tile.has-product img { object-fit: contain; padding: 14px 14px 54px; }
+.home-banner-tile.has-product:hover img { transform: scale(1.03); transition: transform 200ms ease; }
+.home-banner-product-caption {
+  position: absolute; left: 0; right: 0; bottom: 0; padding: 8px 12px 10px;
+  background: linear-gradient(0deg, #fff 55%, rgba(255,255,255,0));
+  display: grid; gap: 4px; text-align: left;
+}
+.home-banner-product-caption strong {
+  font-size: 11.5px; font-weight: 800; color: var(--ink); line-height: 1.25;
+  display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;
+}
+.home-banner-product-specs { display: flex; flex-wrap: wrap; gap: 5px; }
+.home-banner-product-specs span {
+  font-size: 9.5px; font-weight: 800; color: var(--teal); background: var(--tint-soft);
+  padding: 2px 7px; border-radius: 999px; white-space: nowrap;
+}
 @media (max-width: 760px) { .home-banner-mosaic { grid-template-columns: repeat(2, 1fr); } }
 
 /* ---- home: blog (5 columnas) ---- */

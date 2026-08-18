@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
-import { Image, Newspaper } from 'lucide-react';
-import { fetchFarettoAccesos, fetchFarettoHomeLayout, FARETTO_HOME_LAYOUT_DEFAULT, FAMILIES, resolveFamily } from '../lib/api.js';
+import { ImageOff, Newspaper } from 'lucide-react';
+import { fetchFarettoAccesos, fetchFarettoHomeLayout, FARETTO_HOME_LAYOUT_DEFAULT, FAMILIES, resolveFamily, cleanSpecValue } from '../lib/api.js';
 import { AccessIcon } from '../lib/accessIcons.jsx';
 
 // Accesos directos (franja de circulos con conteo por familia, debajo de los
@@ -28,18 +28,56 @@ const FALLBACK_QUICKLINKS = [
 ];
 
 // Mosaico de banners: mismo lenguaje de zonas que home-banner-mosaic en
-// sitio_power (1 ancho 2:1 + verticales 3:4 + cuadrados 1:1). Sin imagenes
-// propias todavia (faretto-catalogo no tiene CMS de banners) - cada entrada
-// queda lista para recibir "imagen" + "href" reales sin tocar el layout.
-const BANNERS = [
-  { zone: 'wide', href: '/catalogo', imagen: null },
-  { zone: 'vertical', href: '/catalogo?familia=paneles-led', imagen: null },
-  { zone: 'vertical', href: '/catalogo?familia=plafones', imagen: null },
-  { zone: 'square', href: null, imagen: null },
-  { zone: 'square', href: null, imagen: null },
-  { zone: 'square', href: null, imagen: null },
-  { zone: 'square', href: null, imagen: null }
-];
+// sitio_power (1 ancho 2:1 + verticales 3:4 + cuadrados 1:1). Sin CMS de
+// banners todavia (viene mas adelante, administrable desde Power Admin) -
+// mientras tanto se rellena con productos reales del catalogo (foto +
+// nombre + atributos, sin precio) en vez de dejar casilleros vacios. Cuando
+// el admin de imagenes este listo, este mosaico se reemplaza por imagenes
+// reales cargadas ahi sin tocar el layout (misma lista de zonas).
+const BANNER_ZONES = ['wide', 'vertical', 'vertical', 'square', 'square', 'square', 'square'];
+
+// Especificaciones mas relevantes para mostrar en la tarjeta (sin precio) -
+// mismo orden de prioridad que usa la ficha de producto (Potencia primero).
+const FEATURED_SPEC_PRIORITY = ['potencia', 'lúmenes', 'lumenes', 'temperatura'];
+
+function isMaskedValue(valor = '') {
+  return /^\*+$/.test(String(valor || '').trim());
+}
+
+function pickTopSpecs(specs = [], max = 2) {
+  return [...specs]
+    .filter((spec) => spec.valor && !isMaskedValue(spec.valor))
+    .sort((a, b) => {
+      const ai = FEATURED_SPEC_PRIORITY.indexOf(a.label.toLowerCase());
+      const bi = FEATURED_SPEC_PRIORITY.indexOf(b.label.toLowerCase());
+      return (ai === -1 ? 99 : ai) - (bi === -1 ? 99 : bi);
+    })
+    .slice(0, max);
+}
+
+// Selecciona productos con foto, dando una vuelta por familia antes de
+// repetir (round-robin) para que el mosaico no quede lleno de variantes de
+// un mismo modelo - simple variedad visual mientras esto es contenido de
+// relleno, no hace falta mas que eso.
+function pickFeaturedProducts(productos = [], count) {
+  const byFamily = new Map();
+  for (const product of productos) {
+    if (!product.imagen) continue;
+    const familyId = resolveFamily(product.nombre).id;
+    if (!byFamily.has(familyId)) byFamily.set(familyId, []);
+    byFamily.get(familyId).push(product);
+  }
+  const families = [...byFamily.keys()];
+  const picked = [];
+  for (let round = 0; picked.length < count && families.some((id) => byFamily.get(id)[round]); round++) {
+    for (const familyId of families) {
+      if (picked.length >= count) break;
+      const candidate = byFamily.get(familyId)[round];
+      if (candidate) picked.push(candidate);
+    }
+  }
+  return picked;
+}
 
 // Sin fuente de datos de blog todavia (faretto-catalogo no expone /blog) -
 // se deja la grilla de 5 lista para mapear articulos reales mas adelante.
@@ -61,19 +99,38 @@ function QuickLink({ nombre, icono, url_destino, onNavigate }) {
   );
 }
 
-function BannerTile({ zone, href, imagen }) {
-  const content = imagen
-    ? <img src={imagen} alt="" loading="lazy" />
-    : (
-      <span className="placeholder">
-        <Image size={20} />
-        Banner pendiente
-      </span>
+function ProductBannerTile({ zone, product, onNavigate }) {
+  if (!product) {
+    return (
+      <div className={`home-banner-tile ${zone}`}>
+        <span className="placeholder">
+          <ImageOff size={20} />
+          Banner pendiente
+        </span>
+      </div>
     );
+  }
 
-  return href
-    ? <a className={`home-banner-tile ${zone}`} href={href}>{content}</a>
-    : <div className={`home-banner-tile ${zone}`}>{content}</div>;
+  const href = `/catalogo?familia=${resolveFamily(product.nombre).id}`;
+  const topSpecs = pickTopSpecs(product.specs);
+
+  return (
+    <a
+      className={`home-banner-tile has-product ${zone}`}
+      href={href}
+      onClick={(event) => { event.preventDefault(); onNavigate(href); }}
+    >
+      {product.imagen ? <img src={product.imagen} alt={product.nombre} loading="lazy" /> : <ImageOff size={22} />}
+      <div className="home-banner-product-caption">
+        <strong>{product.nombre}</strong>
+        {topSpecs.length > 0 && (
+          <div className="home-banner-product-specs">
+            {topSpecs.map((spec) => <span key={spec.label}>{cleanSpecValue(spec.label, spec.valor)}</span>)}
+          </div>
+        )}
+      </div>
+    </a>
+  );
 }
 
 function SeoIntroSection() {
@@ -88,16 +145,17 @@ function SeoIntroSection() {
   );
 }
 
-function BannersSection() {
+function BannersSection({ productos = [], onNavigate }) {
+  const featured = pickFeaturedProducts(productos, BANNER_ZONES.length);
   return (
     <>
       <div className="home-section-heading">
         <h2>Novedades</h2>
-        <p>Banners a definir — estructura lista para recibir imágenes.</p>
+        <p>Selección del catálogo — sección en desarrollo, pronto con gráficas propias.</p>
       </div>
       <div className="home-banner-mosaic">
-        {BANNERS.map((banner, index) => (
-          <BannerTile key={index} {...banner} />
+        {BANNER_ZONES.map((zone, index) => (
+          <ProductBannerTile key={featured[index]?.id ?? index} zone={zone} product={featured[index]} onNavigate={onNavigate} />
         ))}
       </div>
     </>
@@ -170,7 +228,7 @@ export function HomePage({ productos, dataStatus = 'ready', onNavigate }) {
 
       {sectionOrder.map((sectionId) => {
         const Section = HOME_SECTIONS[sectionId];
-        return Section ? <Section key={sectionId} /> : null;
+        return Section ? <Section key={sectionId} productos={productos} onNavigate={onNavigate} /> : null;
       })}
     </>
   );
