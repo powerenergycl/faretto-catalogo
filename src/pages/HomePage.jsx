@@ -27,14 +27,27 @@ const FALLBACK_QUICKLINKS = [
   { nombre: 'Power Energy', icono: 'building-2', url_destino: 'https://powerenergy.cl' }
 ];
 
-// Mosaico de banners: mismo lenguaje de zonas que home-banner-mosaic en
-// sitio_power (1 ancho 2:1 + verticales 3:4 + cuadrados 1:1). Sin CMS de
-// banners todavia (viene mas adelante, administrable desde Power Admin) -
-// mientras tanto se rellena con productos reales del catalogo (foto +
-// nombre + atributos, sin precio) en vez de dejar casilleros vacios. Cuando
-// el admin de imagenes este listo, este mosaico se reemplaza por imagenes
-// reales cargadas ahi sin tocar el layout (misma lista de zonas).
-const BANNER_ZONES = ['wide', 'vertical', 'vertical', 'square', 'square', 'square', 'square'];
+// Mosaico de banners: filas de 3 casilleros que suman 2+1+1=4 columnas (calzan
+// exacto con las 4 de .home-banner-mosaic, asi que el auto-flow del grid las
+// envuelve solo sin necesitar grid-row a mano) y alternan wide-primero /
+// wide-al-final - mismas dos filas que ya usaba el admin de sitio_power
+// (bannerLayoutSlots/invertedBannerLayoutSlots en AdminPage.jsx), reusadas tal
+// cual del lado del admin via buildFarettoBannerLayoutSlots. Dinamico: solo se
+// generan tantas filas como hagan falta para los banners realmente cargados.
+const BANNER_ROW_A = ['wide', 'vertical', 'vertical'];
+const BANNER_ROW_B = ['vertical', 'vertical', 'wide'];
+
+function buildBannerRowZones(rowCount) {
+  const zones = [];
+  for (let row = 0; row < rowCount; row++) {
+    zones.push(...(row % 2 === 0 ? BANNER_ROW_A : BANNER_ROW_B));
+  }
+  return zones;
+}
+
+// Relleno de productos (sin CMS de banners aun / grilla vacia): 2 filas fijas
+// (6 casilleros) como preview razonable, no depende de datos reales del admin.
+const PLACEHOLDER_BANNER_ROWS = 2;
 
 // Especificaciones mas relevantes para mostrar en la tarjeta (sin precio) -
 // mismo orden de prioridad que usa la ficha de producto (Potencia primero).
@@ -201,13 +214,17 @@ function BannersSection({ productos = [], onNavigate }) {
   const activeGrid = (banners || []).find((grid) => Array.isArray(grid.banners) && grid.banners.length > 0);
 
   if (activeGrid) {
-    // "posicion" en el admin (y BANNER_ZONES) arranca en 0, no en 1 - orden:0
-    // es un valor real y valido, no "sin posicion". Usar "|| index+1" (como
-    // antes) trata 0 como falsy y lo pisa con el indice del array, chocando
-    // con el tile de orden:1 en la misma key y perdiendo el de orden:0 por
-    // completo. Con ?? (nullish) en vez de || no hay esa ambiguedad, y el
-    // lookup ya no suma +1 - misma base 0 en ambos lados.
+    // "posicion" en el admin arranca en 0, no en 1 - orden:0 es un valor real
+    // y valido, no "sin posicion". Usar "|| index+1" (como antes) trata 0
+    // como falsy y lo pisa con el indice del array, chocando con el tile de
+    // orden:1 en la misma key y perdiendo el de orden:0 por completo. Con ??
+    // (nullish) en vez de || no hay esa ambiguedad, y el lookup no suma +1.
     const tilesByPosicion = new Map(activeGrid.banners.map((tile) => [Number(tile.orden ?? 0), tile]));
+    // Solo tantas filas como hagan falta para cubrir los banners cargados
+    // (sin fila extra "libre" de mas - eso es solo para el admin, aca no
+    // tiene sentido mostrarle a un cliente casilleros vacios de sobra).
+    const rowCount = Math.ceil(activeGrid.banners.length / BANNER_ROW_A.length);
+    const zones = buildBannerRowZones(rowCount);
     return (
       <>
         <div className="home-section-heading">
@@ -215,7 +232,7 @@ function BannersSection({ productos = [], onNavigate }) {
           <p>Selección destacada de Power Energy.</p>
         </div>
         <div className="home-banner-mosaic">
-          {BANNER_ZONES.map((defaultZone, index) => {
+          {zones.map((defaultZone, index) => {
             const tile = tilesByPosicion.get(index);
             const zone = tile?.zona || defaultZone;
             return <ImageBannerTile key={index} zone={zone} tile={tile} onNavigate={onNavigate} />;
@@ -225,7 +242,8 @@ function BannersSection({ productos = [], onNavigate }) {
     );
   }
 
-  const featured = pickFeaturedProducts(productos, BANNER_ZONES.length);
+  const placeholderZones = buildBannerRowZones(PLACEHOLDER_BANNER_ROWS);
+  const featured = pickFeaturedProducts(productos, placeholderZones.length);
   return (
     <>
       <div className="home-section-heading">
@@ -233,7 +251,7 @@ function BannersSection({ productos = [], onNavigate }) {
         <p>Selección del catálogo — sección en desarrollo, pronto con gráficas propias.</p>
       </div>
       <div className="home-banner-mosaic">
-        {BANNER_ZONES.map((zone, index) => (
+        {placeholderZones.map((zone, index) => (
           <ProductBannerTile key={featured[index]?.id ?? index} zone={zone} product={featured[index]} onNavigate={onNavigate} />
         ))}
       </div>
