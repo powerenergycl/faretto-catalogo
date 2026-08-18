@@ -57,6 +57,19 @@ export async function fetchFarettoMenu() {
   return Array.isArray(data.items) ? data.items : Array.isArray(data) ? data : [];
 }
 
+// Grilla de banners de "Novedades": administrable desde Power Admin > sitio
+// Faretto > Diseño de Home > Grilla banners. Mientras no haya ninguna grilla
+// cargada, HomePage rellena esa seccion con productos del catalogo en vez
+// de imagenes (ver BannersSection).
+export async function fetchFarettoBanners() {
+  const response = await fetch(`${API_BASE}/api/public/faretto-banners`);
+  if (!response.ok) {
+    throw new Error(`No se pudieron cargar los banners (HTTP ${response.status})`);
+  }
+  const data = await response.json();
+  return Array.isArray(data.grids) ? data.grids : [];
+}
+
 export function formatPrice(value) {
   if (value === null || value === undefined) return 'Consultar';
   return Number(value).toLocaleString('es-CL', { style: 'currency', currency: 'CLP', maximumFractionDigits: 0 });

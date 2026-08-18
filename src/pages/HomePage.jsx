@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { ImageOff, Newspaper } from 'lucide-react';
-import { fetchFarettoAccesos, fetchFarettoHomeLayout, FARETTO_HOME_LAYOUT_DEFAULT, FAMILIES, resolveFamily, cleanSpecValue } from '../lib/api.js';
+import { fetchFarettoAccesos, fetchFarettoHomeLayout, fetchFarettoBanners, FARETTO_HOME_LAYOUT_DEFAULT, FAMILIES, resolveFamily, cleanSpecValue } from '../lib/api.js';
 import { AccessIcon } from '../lib/accessIcons.jsx';
 
 // Accesos directos (franja de circulos con conteo por familia, debajo de los
@@ -133,6 +133,38 @@ function ProductBannerTile({ zone, product, onNavigate }) {
   );
 }
 
+// Tile de banner con imagen real cargada desde Power Admin > sitio Faretto >
+// Diseño de Home > Grilla banners. Misma forma que ProductBannerTile (mismo
+// placeholder si falta la imagen) pero sin caption superpuesto: la imagen del
+// banner ya trae su propio diseño.
+function ImageBannerTile({ zone, tile, onNavigate }) {
+  if (!tile || !tile.imagen_url) {
+    return (
+      <div className={`home-banner-tile ${zone}`}>
+        <span className="placeholder">
+          <ImageOff size={20} />
+          Banner pendiente
+        </span>
+      </div>
+    );
+  }
+
+  const href = tile.url_destino || '';
+  const external = /^https?:\/\//i.test(href);
+
+  return (
+    <a
+      className={`home-banner-tile has-product ${zone}`}
+      href={href || '#'}
+      target={external ? '_blank' : undefined}
+      rel={external ? 'noreferrer' : undefined}
+      onClick={href && !external ? (event) => { event.preventDefault(); onNavigate(href); } : undefined}
+    >
+      <img src={tile.imagen_url} alt={tile.alt || tile.titulo || ''} loading="lazy" />
+    </a>
+  );
+}
+
 function SeoIntroSection() {
   return (
     <div className="home-seo-intro">
@@ -146,6 +178,42 @@ function SeoIntroSection() {
 }
 
 function BannersSection({ productos = [], onNavigate }) {
+  // null = todavia no respondio el fetch, [] = respondio pero no hay grilla
+  // configurada (o esta vacia) para Faretto en Power Admin.
+  const [banners, setBanners] = useState(null);
+
+  useEffect(() => {
+    let cancelled = false;
+    fetchFarettoBanners()
+      .then((grids) => { if (!cancelled) setBanners(grids); })
+      .catch(() => { if (!cancelled) setBanners([]); });
+    return () => { cancelled = true; };
+  }, []);
+
+  // Se usa la primera grilla con al menos un tile cargado; mientras no haya
+  // ninguna (fetch pendiente, sin configurar o vacia) se rellena con
+  // productos del catalogo para que la seccion nunca quede vacia.
+  const activeGrid = (banners || []).find((grid) => Array.isArray(grid.banners) && grid.banners.length > 0);
+
+  if (activeGrid) {
+    const tilesByPosicion = new Map(activeGrid.banners.map((tile, index) => [Number(tile.orden) || index + 1, tile]));
+    return (
+      <>
+        <div className="home-section-heading">
+          <h2>Novedades</h2>
+          <p>Selección destacada de Power Energy.</p>
+        </div>
+        <div className="home-banner-mosaic">
+          {BANNER_ZONES.map((defaultZone, index) => {
+            const tile = tilesByPosicion.get(index + 1) || activeGrid.banners[index];
+            const zone = tile?.zona || defaultZone;
+            return <ImageBannerTile key={index} zone={zone} tile={tile} onNavigate={onNavigate} />;
+          })}
+        </div>
+      </>
+    );
+  }
+
   const featured = pickFeaturedProducts(productos, BANNER_ZONES.length);
   return (
     <>
