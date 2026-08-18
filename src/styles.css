@@ -81,7 +81,12 @@ a:focus-visible, button:focus-visible, input:focus-visible {
 
 /* ---- home: banners (mosaico de recuadros, mismo lenguaje que sitio_power) ---- */
 .home-banner-mosaic { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; }
-.home-banner-tile { position: relative; border-radius: 8px; overflow: hidden; background: var(--tint-soft); border: 1px dashed var(--line-soft); display: grid; place-items: center; color: #9aa6bb; }
+/* align-self: start es la parte importante - sin esto, el grid estira cada
+   celda a la altura de la fila (la de los tiles "vertical", mas altos que
+   el "wide"), y el aspect-ratio de abajo queda ignorado: la caja termina
+   mas alta de lo que su propio ratio pide, dejando un hueco vacio debajo
+   de la imagen (object-fit: contain la centra en esa altura de mas). */
+.home-banner-tile { position: relative; border-radius: 8px; overflow: hidden; background: var(--tint-soft); border: 1px dashed var(--line-soft); display: grid; place-items: center; color: #9aa6bb; align-self: start; }
 .home-banner-tile.wide { grid-column: span 2; aspect-ratio: 2 / 1; }
 .home-banner-tile.vertical { aspect-ratio: 3 / 4; }
 .home-banner-tile.square { aspect-ratio: 1 / 1; }
