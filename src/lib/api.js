@@ -29,6 +29,21 @@ export async function fetchFarettoAccesos() {
   return Array.isArray(data.items) ? data.items : Array.isArray(data) ? data : [];
 }
 
+// Orden de las secciones del home (bloque SEO, banners "Novedades", blog),
+// administrable desde Power Admin > sitio Faretto > Orden del Home. Mismo
+// default que el backend (publicCatalogService.js#FARETTO_HOME_LAYOUT_DEFAULT)
+// por si el fetch falla.
+export const FARETTO_HOME_LAYOUT_DEFAULT = ['seo-intro', 'banners', 'blog'];
+
+export async function fetchFarettoHomeLayout() {
+  const response = await fetch(`${API_BASE}/api/public/faretto-home-layout`);
+  if (!response.ok) {
+    throw new Error(`No se pudo cargar el orden del home (HTTP ${response.status})`);
+  }
+  const data = await response.json();
+  return Array.isArray(data.orden) && data.orden.length > 0 ? data.orden : FARETTO_HOME_LAYOUT_DEFAULT;
+}
+
 export function formatPrice(value) {
   if (value === null || value === undefined) return 'Consultar';
   return Number(value).toLocaleString('es-CL', { style: 'currency', currency: 'CLP', maximumFractionDigits: 0 });

@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { Image, Newspaper } from 'lucide-react';
-import { fetchFarettoAccesos, FAMILIES, resolveFamily } from '../lib/api.js';
+import { fetchFarettoAccesos, fetchFarettoHomeLayout, FARETTO_HOME_LAYOUT_DEFAULT, FAMILIES, resolveFamily } from '../lib/api.js';
 import { AccessIcon } from '../lib/accessIcons.jsx';
 
 // Accesos directos (franja de circulos con conteo por familia, debajo de los
@@ -76,14 +76,77 @@ function BannerTile({ zone, href, imagen }) {
     : <div className={`home-banner-tile ${zone}`}>{content}</div>;
 }
 
+function SeoIntroSection() {
+  return (
+    <div className="home-seo-intro">
+      <h1>Iluminación técnica Faretto en Chile</h1>
+      <p>
+        Catálogo Faretto disponible en Power Energy: plafones, paneles LED, luminaria pública y cintas LED
+        con ficha técnica, stock y despacho a todo Chile.
+      </p>
+    </div>
+  );
+}
+
+function BannersSection() {
+  return (
+    <>
+      <div className="home-section-heading">
+        <h2>Novedades</h2>
+        <p>Banners a definir — estructura lista para recibir imágenes.</p>
+      </div>
+      <div className="home-banner-mosaic">
+        {BANNERS.map((banner, index) => (
+          <BannerTile key={index} {...banner} />
+        ))}
+      </div>
+    </>
+  );
+}
+
+function BlogSection() {
+  return (
+    <>
+      <div className="home-section-heading">
+        <h2>Del blog</h2>
+        <p>Artículos a definir — estructura lista para recibir contenido.</p>
+      </div>
+      <div className="home-blog-grid">
+        {Array.from({ length: BLOG_PLACEHOLDER_COUNT }).map((_, index) => (
+          <article className="home-blog-card" key={index}>
+            <div className="home-blog-thumb"><Newspaper size={22} /></div>
+            <div className="home-blog-body">
+              <span>Blog</span>
+              <strong>Artículo pendiente</strong>
+            </div>
+          </article>
+        ))}
+      </div>
+    </>
+  );
+}
+
+// Secciones reordenables desde Power Admin > sitio Faretto > Orden del Home
+// (ver fetchFarettoHomeLayout). "Accesos destacados" y, si se reactiva,
+// "Accesos directos" no estan aca a proposito: van siempre primero, fijas.
+const HOME_SECTIONS = {
+  'seo-intro': SeoIntroSection,
+  banners: BannersSection,
+  blog: BlogSection
+};
+
 export function HomePage({ productos, dataStatus = 'ready', onNavigate }) {
   const [accesos, setAccesos] = useState(null); // null = todavia no respondio
+  const [sectionOrder, setSectionOrder] = useState(FARETTO_HOME_LAYOUT_DEFAULT);
 
   useEffect(() => {
     let cancelled = false;
     fetchFarettoAccesos()
       .then((items) => { if (!cancelled) setAccesos(items); })
       .catch(() => { if (!cancelled) setAccesos([]); });
+    fetchFarettoHomeLayout()
+      .then((orden) => { if (!cancelled) setSectionOrder(orden); })
+      .catch(() => {}); // ya arranca con el default, no hace falta setear nada
     return () => { cancelled = true; };
   }, []);
 
@@ -105,41 +168,10 @@ export function HomePage({ productos, dataStatus = 'ready', onNavigate }) {
         <FamilyStrip productos={productos} dataStatus={dataStatus} onNavigate={onNavigate} />
       )}
 
-      <div className="home-seo-intro">
-        <h1>Iluminación técnica Faretto en Chile</h1>
-        <p>
-          Catálogo Faretto disponible en Power Energy: plafones, paneles LED, luminaria pública y cintas LED
-          con ficha técnica, stock y despacho a todo Chile.
-        </p>
-      </div>
-
-      {/* ---- banners ---- */}
-      <div className="home-section-heading">
-        <h2>Novedades</h2>
-        <p>Banners a definir — estructura lista para recibir imágenes.</p>
-      </div>
-      <div className="home-banner-mosaic">
-        {BANNERS.map((banner, index) => (
-          <BannerTile key={index} {...banner} />
-        ))}
-      </div>
-
-      {/* ---- blog ---- */}
-      <div className="home-section-heading">
-        <h2>Del blog</h2>
-        <p>Artículos a definir — estructura lista para recibir contenido.</p>
-      </div>
-      <div className="home-blog-grid">
-        {Array.from({ length: BLOG_PLACEHOLDER_COUNT }).map((_, index) => (
-          <article className="home-blog-card" key={index}>
-            <div className="home-blog-thumb"><Newspaper size={22} /></div>
-            <div className="home-blog-body">
-              <span>Blog</span>
-              <strong>Artículo pendiente</strong>
-            </div>
-          </article>
-        ))}
-      </div>
+      {sectionOrder.map((sectionId) => {
+        const Section = HOME_SECTIONS[sectionId];
+        return Section ? <Section key={sectionId} /> : null;
+      })}
     </>
   );
 }
