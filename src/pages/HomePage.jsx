@@ -201,7 +201,13 @@ function BannersSection({ productos = [], onNavigate }) {
   const activeGrid = (banners || []).find((grid) => Array.isArray(grid.banners) && grid.banners.length > 0);
 
   if (activeGrid) {
-    const tilesByPosicion = new Map(activeGrid.banners.map((tile, index) => [Number(tile.orden) || index + 1, tile]));
+    // "posicion" en el admin (y BANNER_ZONES) arranca en 0, no en 1 - orden:0
+    // es un valor real y valido, no "sin posicion". Usar "|| index+1" (como
+    // antes) trata 0 como falsy y lo pisa con el indice del array, chocando
+    // con el tile de orden:1 en la misma key y perdiendo el de orden:0 por
+    // completo. Con ?? (nullish) en vez de || no hay esa ambiguedad, y el
+    // lookup ya no suma +1 - misma base 0 en ambos lados.
+    const tilesByPosicion = new Map(activeGrid.banners.map((tile) => [Number(tile.orden ?? 0), tile]));
     return (
       <>
         <div className="home-section-heading">
@@ -210,7 +216,7 @@ function BannersSection({ productos = [], onNavigate }) {
         </div>
         <div className="home-banner-mosaic">
           {BANNER_ZONES.map((defaultZone, index) => {
-            const tile = tilesByPosicion.get(index + 1) || activeGrid.banners[index];
+            const tile = tilesByPosicion.get(index);
             const zone = tile?.zona || defaultZone;
             return <ImageBannerTile key={index} zone={zone} tile={tile} onNavigate={onNavigate} />;
           })}
