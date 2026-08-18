@@ -44,6 +44,19 @@ export async function fetchFarettoHomeLayout() {
   return Array.isArray(data.orden) && data.orden.length > 0 ? data.orden : FARETTO_HOME_LAYOUT_DEFAULT;
 }
 
+// Menu principal (barra superior): administrable desde Power Admin > sitio
+// Faretto > Menu principal. Si el fetch falla o todavia no hay ningun item
+// cargado, Header cae a su lista fija propia - la barra nunca debe quedar
+// vacia.
+export async function fetchFarettoMenu() {
+  const response = await fetch(`${API_BASE}/api/public/faretto-menu`);
+  if (!response.ok) {
+    throw new Error(`No se pudo cargar el menu (HTTP ${response.status})`);
+  }
+  const data = await response.json();
+  return Array.isArray(data.items) ? data.items : Array.isArray(data) ? data : [];
+}
+
 export function formatPrice(value) {
   if (value === null || value === undefined) return 'Consultar';
   return Number(value).toLocaleString('es-CL', { style: 'currency', currency: 'CLP', maximumFractionDigits: 0 });

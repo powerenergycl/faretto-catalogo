@@ -1,16 +1,44 @@
+import { useEffect, useState } from 'react';
 import { Search, MessageCircle } from 'lucide-react';
+import { fetchFarettoMenu } from '../lib/api.js';
 
 // Solo 2 rutas reales por ahora (Home y Catalogo, por eso el pedido
 // original) - los demas links de familia navegan a /catalogo con el filtro
 // ya aplicado, no a paginas propias.
-const NAV_LINKS = [
+// Respaldo mientras no haya nada cargado en el admin (Power Admin > sitio
+// Faretto > Menu principal), o si el fetch falla - la barra nunca debe
+// quedar vacia.
+const FALLBACK_NAV_LINKS = [
   { href: '/catalogo', label: 'Catálogo completo' },
   { href: '/catalogo?familia=plafones', label: 'Plafones' },
   { href: '/catalogo?familia=luminaria-publica', label: 'Luminaria pública' },
   { href: '/catalogo?familia=paneles-led', label: 'Paneles LED' }
 ];
 
+// menu_principal guarda "url" tal cual lo escribio el admin, sin garantia de
+// "/" inicial para rutas internas (ver ejemplo real: "categorias" en vez de
+// "/categorias"). externo === abre pestana nueva; para el resto se detecta
+// por prefijo http igual que en los accesos destacados.
+function normalizeMenuItem({ etiqueta, url, tipo }) {
+  const raw = String(url || '').trim();
+  const external = tipo === 'externo' || /^https?:\/\//i.test(raw);
+  const href = external || raw.startsWith('/') ? raw : `/${raw}`;
+  return { label: etiqueta, href, external };
+}
+
 export function Header({ route, onNavigate }) {
+  const [menuItems, setMenuItems] = useState(null); // null = todavia no respondio
+
+  useEffect(() => {
+    let cancelled = false;
+    fetchFarettoMenu()
+      .then((items) => { if (!cancelled) setMenuItems(items.map(normalizeMenuItem)); })
+      .catch(() => { if (!cancelled) setMenuItems([]); });
+    return () => { cancelled = true; };
+  }, []);
+
+  const navLinks = menuItems && menuItems.length > 0 ? menuItems : FALLBACK_NAV_LINKS;
+
   return (
     <header className="public-header">
       <div className="header-row">
@@ -30,12 +58,14 @@ export function Header({ route, onNavigate }) {
         </div>
       </div>
       <nav className="public-nav">
-        {NAV_LINKS.map((link) => (
+        {navLinks.map((link) => (
           <a
             key={link.href}
             href={link.href}
-            className={`${route.pathname}${route.search}` === link.href || (route.pathname === link.href && !route.search) ? 'active' : ''}
-            onClick={(event) => { event.preventDefault(); onNavigate(link.href); }}
+            target={link.external ? '_blank' : undefined}
+            rel={link.external ? 'noreferrer' : undefined}
+            className={!link.external && (`${route.pathname}${route.search}` === link.href || (route.pathname === link.href && !route.search)) ? 'active' : ''}
+            onClick={link.external ? undefined : (event) => { event.preventDefault(); onNavigate(link.href); }}
           >
             {link.label}
           </a>
