@@ -87,12 +87,16 @@ a:focus-visible, button:focus-visible, input:focus-visible {
    mas alta de lo que su propio ratio pide, dejando un hueco vacio debajo
    de la imagen (object-fit: contain la centra en esa altura de mas). */
 .home-banner-tile { position: relative; border-radius: 8px; overflow: hidden; background: var(--tint-soft); border: 1px dashed var(--line-soft); display: grid; place-items: center; color: #9aa6bb; align-self: start; }
-/* 3/2 (no 2/1): con 4 columnas iguales, un vertical de 1 columna a 3:4 da una
-   altura de 1.33x el ancho de columna. Para que el tile ancho (2 columnas)
-   llegue a esa misma altura sin estirarlo (eso fue el bug del "hueco" que se
-   corrigio con align-self:start), su propia proporcion debe ser 3:2. */
-.home-banner-tile.wide { grid-column: span 2; aspect-ratio: 3 / 2; }
-.home-banner-tile.vertical { aspect-ratio: 3 / 4; }
+/* Proporciones = medida real de los banners que Faretto sube (no un numero
+   redondo inventado): ancho 1024x658px, vertical 948x1024px - medidos
+   directo de los archivos de referencia. object-fit:cover en .has-banner-image
+   recorta lo que sobre sin dejar huecos, asi que no hace falta que ancho y
+   vertical den la misma altura entre si para verse bien en la misma fila
+   (eso era necesario con los placeholders de producto en "contain", no con
+   una imagen real en "cover"). "square" no tiene banner real de referencia
+   todavia - se deja 1:1 literal hasta que haya uno. */
+.home-banner-tile.wide { grid-column: span 2; aspect-ratio: 1024 / 658; }
+.home-banner-tile.vertical { aspect-ratio: 948 / 1024; }
 .home-banner-tile.square { aspect-ratio: 1 / 1; }
 .home-banner-tile img { width: 100%; height: 100%; object-fit: cover; }
 .home-banner-tile .placeholder { display: grid; justify-items: center; gap: 6px; font-size: 10px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.04em; }
