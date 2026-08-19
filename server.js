@@ -26,8 +26,8 @@ app.use(express.static(distPath, {
   }
 }));
 
-// SPA fallback: solo 2 rutas reales (Home y /catalogo), ambas resueltas del
-// lado del cliente por App.jsx.
+// SPA fallback: rutas reales (Home, /catalogo, /blog, /blog/:slug) resueltas
+// del lado del cliente por App.jsx.
 app.get('*', (_req, res) => {
   res.sendFile(indexPath);
 });

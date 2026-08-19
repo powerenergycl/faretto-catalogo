@@ -70,6 +70,27 @@ export async function fetchFarettoBanners() {
   return Array.isArray(data.grids) ? data.grids : [];
 }
 
+// Blog: administrable desde Power Admin > sitio Faretto (mismos articulos que
+// se editan ahi, independientes de los que ya tiene sitio_power - ver
+// listFarettoBlogPublic/getFarettoBlogPostPublic en publicCatalogService.js).
+export async function fetchFarettoBlog() {
+  const response = await fetch(`${API_BASE}/api/public/faretto-blog`);
+  if (!response.ok) {
+    throw new Error(`No se pudo cargar el blog (HTTP ${response.status})`);
+  }
+  const data = await response.json();
+  return Array.isArray(data.posts) ? data.posts : [];
+}
+
+export async function fetchFarettoBlogPost(slug) {
+  const response = await fetch(`${API_BASE}/api/public/faretto-blog/${encodeURIComponent(slug)}`);
+  if (response.status === 404) return null;
+  if (!response.ok) {
+    throw new Error(`No se pudo cargar el articulo (HTTP ${response.status})`);
+  }
+  return response.json();
+}
+
 export function formatPrice(value) {
   if (value === null || value === undefined) return 'Consultar';
   return Number(value).toLocaleString('es-CL', { style: 'currency', currency: 'CLP', maximumFractionDigits: 0 });

@@ -1,7 +1,8 @@
 import { useEffect, useState } from 'react';
 import { ImageOff, Newspaper } from 'lucide-react';
-import { fetchFarettoAccesos, fetchFarettoHomeLayout, fetchFarettoBanners, FARETTO_HOME_LAYOUT_DEFAULT, FAMILIES, resolveFamily, cleanSpecValue } from '../lib/api.js';
+import { fetchFarettoAccesos, fetchFarettoHomeLayout, fetchFarettoBanners, fetchFarettoBlog, FARETTO_HOME_LAYOUT_DEFAULT, FAMILIES, resolveFamily, cleanSpecValue } from '../lib/api.js';
 import { AccessIcon } from '../lib/accessIcons.jsx';
+import { formatBlogDate } from './BlogPage.jsx';
 
 // Accesos directos (franja de circulos con conteo por familia, debajo de los
 // 9 botones) - pedido explicito: ocultar por ahora, se retoma mas adelante.
@@ -259,23 +260,65 @@ function BannersSection({ productos = [], onNavigate }) {
   );
 }
 
-function BlogSection() {
+function BlogSection({ onNavigate }) {
+  // null = todavia no respondio el fetch
+  const [posts, setPosts] = useState(null);
+
+  useEffect(() => {
+    let cancelled = false;
+    fetchFarettoBlog()
+      .then((data) => { if (!cancelled) setPosts(data); })
+      .catch(() => { if (!cancelled) setPosts([]); });
+    return () => { cancelled = true; };
+  }, []);
+
+  const featured = (posts || []).slice(0, BLOG_PLACEHOLDER_COUNT);
+
   return (
     <>
       <div className="home-section-heading">
         <h2>Del blog</h2>
-        <p>Artículos a definir — estructura lista para recibir contenido.</p>
+        {featured.length > 0 ? (
+          <p>
+            <a href="/blog" onClick={(event) => { event.preventDefault(); onNavigate('/blog'); }}>Ver todos los artículos</a>
+          </p>
+        ) : (
+          <p>Artículos a definir — estructura lista para recibir contenido.</p>
+        )}
       </div>
       <div className="home-blog-grid">
-        {Array.from({ length: BLOG_PLACEHOLDER_COUNT }).map((_, index) => (
-          <article className="home-blog-card" key={index}>
-            <div className="home-blog-thumb"><Newspaper size={22} /></div>
-            <div className="home-blog-body">
-              <span>Blog</span>
-              <strong>Artículo pendiente</strong>
-            </div>
-          </article>
-        ))}
+        {featured.length > 0 ? (
+          featured.map((post) => (
+            <a
+              key={post.slug}
+              className="home-blog-card"
+              href={`/blog/${post.slug}`}
+              onClick={(event) => { event.preventDefault(); onNavigate(`/blog/${post.slug}`); }}
+            >
+              <div className="home-blog-thumb">
+                {post.imagen_url ? (
+                  <img src={post.imagen_url} alt={post.imagen_alt || post.titulo} loading="lazy" />
+                ) : (
+                  <Newspaper size={22} />
+                )}
+              </div>
+              <div className="home-blog-body">
+                <span>{formatBlogDate(post.fecha_publicacion)}</span>
+                <strong>{post.titulo}</strong>
+              </div>
+            </a>
+          ))
+        ) : (
+          Array.from({ length: BLOG_PLACEHOLDER_COUNT }).map((_, index) => (
+            <article className="home-blog-card" key={index}>
+              <div className="home-blog-thumb"><Newspaper size={22} /></div>
+              <div className="home-blog-body">
+                <span>Blog</span>
+                <strong>Artículo pendiente</strong>
+              </div>
+            </article>
+          ))
+        )}
       </div>
     </>
   );
