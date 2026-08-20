@@ -70,6 +70,18 @@ export async function fetchFarettoBanners() {
   return Array.isArray(data.grids) ? data.grids : [];
 }
 
+// Hero/slider debajo del header: administrable desde Power Admin > sitio
+// Faretto > grupo Faretto > Hero / Slider. Tabla propia (faretto_hero_slides),
+// no compartida con el slider de sitio_power.
+export async function fetchFarettoHeroSlides() {
+  const response = await fetch(`${API_BASE}/api/public/faretto-hero-slides`);
+  if (!response.ok) {
+    throw new Error(`No se pudo cargar el hero (HTTP ${response.status})`);
+  }
+  const data = await response.json();
+  return Array.isArray(data.slides) ? data.slides : [];
+}
+
 // Blog: administrable desde Power Admin > sitio Faretto (mismos articulos que
 // se editan ahi, independientes de los que ya tiene sitio_power - ver
 // listFarettoBlogPublic/getFarettoBlogPostPublic en publicCatalogService.js).

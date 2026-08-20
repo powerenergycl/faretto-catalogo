@@ -55,6 +55,23 @@ a:focus-visible, button:focus-visible, input:focus-visible {
 
 .public-main { max-width: 1240px; margin: 0 auto; padding: 20px clamp(16px, 3vw, 40px) 40px; }
 
+/* ---- home: hero slider (debajo del header, ancho completo) ----
+   aspect-ratio fijo (no min-height a ojo): 1366x425 desktop, 1208x720 mobile
+   - son las medidas reales que van a subir por el admin. Se reserva SIEMPRE
+   (incluso mientras carga, aria-busy) para que no salte el layout cuando
+   llegan los datos; si terminan siendo 0 slides el <section> completo se
+   deja de renderizar (ver HeroSection.jsx), asi que no queda un hueco vacio
+   reservado de por vida. */
+.hero-slider { position: relative; width: 100%; aspect-ratio: 1366 / 425; background: var(--tint-soft); overflow: hidden; }
+@media (max-width: 720px) { .hero-slider { aspect-ratio: 1208 / 720; } }
+.hero-slider-track { position: absolute; inset: 0; }
+.hero-slide { position: absolute; inset: 0; opacity: 0; transition: opacity 600ms ease; display: block; }
+.hero-slide.is-active { opacity: 1; z-index: 1; }
+.hero-slide picture, .hero-slide img { display: block; width: 100%; height: 100%; object-fit: cover; }
+.hero-slider-dots { position: absolute; left: 0; right: 0; bottom: 16px; z-index: 2; display: flex; justify-content: center; gap: 8px; }
+.hero-slider-dots button { width: 9px; height: 9px; padding: 0; border: 0; border-radius: 999px; background: rgba(255,255,255,0.55); cursor: pointer; }
+.hero-slider-dots button.active { background: #fff; }
+
 /* ---- home: round category strip ---- */
 .round-category-strip { display: grid; grid-template-columns: repeat(6, minmax(100px, 1fr)); gap: 16px 10px; margin: 24px 0 8px; }
 @media (max-width: 900px) { .round-category-strip { grid-template-columns: repeat(3, minmax(0,1fr)); } }

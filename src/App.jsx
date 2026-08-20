@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { Header } from './components/Header.jsx';
 import { Footer } from './components/Footer.jsx';
+import { HeroSection } from './components/HeroSection.jsx';
 import { HomePage } from './pages/HomePage.jsx';
 import { CategoryPage } from './pages/CategoryPage.jsx';
 import { BlogPage } from './pages/BlogPage.jsx';
@@ -41,10 +42,14 @@ export function App() {
   const isBlog = route.pathname === '/blog';
   const blogSlugMatch = route.pathname.match(/^\/blog\/([^/]+)\/?$/);
   const blogSlug = blogSlugMatch ? decodeURIComponent(blogSlugMatch[1]) : null;
+  const isHome = !isCatalogo && !isBlog && !blogSlug;
 
   return (
     <div>
       <Header route={route} onNavigate={navigate} />
+      {/* Fuera de .public-main a proposito: el hero debe ocupar el ancho
+          completo de la pantalla, sin heredar su max-width/padding. */}
+      {isHome && <HeroSection onNavigate={navigate} />}
       <main className="public-main">
         {isCatalogo ? (
           <>
