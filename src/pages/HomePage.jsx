@@ -305,6 +305,7 @@ function BlogSection({ onNavigate }) {
               <div className="home-blog-body">
                 <span>{formatBlogDate(post.fecha_publicacion)}</span>
                 <strong>{post.titulo}</strong>
+                {post.resumen && <p>{post.resumen}</p>}
               </div>
             </a>
           ))
