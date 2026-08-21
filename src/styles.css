@@ -38,12 +38,11 @@ a:focus-visible, button:focus-visible, input:focus-visible {
 /* ---- header ----
    Por defecto (tope de la pagina): fondo teal solido, logo blanco. Al hacer
    scroll (.is-scrolled, ver Header.jsx) pasa a fondo blanco con el logo a
-   color -- el mismo patron de header que "se define" al bajar. Los colores
-   de nav/borde se transicionan junto con el fondo; buscador y boton de
-   WhatsApp quedan igual en los dos estados (son su propia "isla" clara/
-   blanca, funcionan bien sobre cualquiera de los dos fondos). */
-.public-header { position: sticky; top: 0; z-index: 40; background: var(--teal); border-bottom: 1px solid transparent; padding: 12px clamp(16px, 3vw, 40px) 0; display: grid; gap: 8px; backdrop-filter: blur(10px); transition: background-color 240ms ease, border-color 240ms ease; }
-.public-header.is-scrolled { background: rgba(255,255,255,0.97); border-bottom-color: var(--line); }
+   color -- el mismo patron de header que "se define" al bajar. Buscador y
+   boton de WhatsApp quedan igual en los dos estados (son su propia "isla"
+   clara/blanca, funcionan bien sobre cualquiera de los dos fondos). */
+.public-header { position: sticky; top: 0; z-index: 40; background: var(--teal); padding: 12px clamp(16px, 3vw, 40px); transition: background-color 240ms ease; }
+.public-header.is-scrolled { background: rgba(255,255,255,0.97); }
 .header-row { display: grid; grid-template-columns: auto 1fr auto; align-items: center; gap: 22px; }
 /* display:grid + grid-area:1/1 en ambas imagenes (no position:absolute): asi
    siguen contando como contenido "en flujo" para el sizing del contenedor
@@ -60,14 +59,27 @@ a:focus-visible, button:focus-visible, input:focus-visible {
 .public-search span { color: #8a97a3; font-size: 14px; }
 .header-icons { display: flex; align-items: center; gap: 10px; }
 .icon-btn { width: 40px; height: 40px; display: grid; place-items: center; border: 1px solid var(--line-soft); border-radius: 999px; background: #fff; color: var(--teal); }
-.public-nav { display: flex; justify-content: center; align-items: center; gap: clamp(14px, 2vw, 26px); min-height: 44px; flex-wrap: wrap; }
-.public-nav a { color: rgba(255,255,255,0.8); font-size: 12px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.02em; transition: color 240ms ease; }
-.public-nav a:hover, .public-nav a.active { color: #fff; }
-.is-scrolled .public-nav a { color: var(--gray); }
-.is-scrolled .public-nav a:hover, .is-scrolled .public-nav a.active { color: var(--teal); }
+.nav-burger { display: none; }
+
+/* Menu principal: a proposito fuera de <header> (elemento hermano, no hijo)
+   -- queda con su propio fondo blanco fijo, independiente del estado
+   teal/blanco del header de arriba, y se desplaza con el resto del
+   contenido en vez de quedar pegado arriba con el header. */
+.public-nav { display: flex; justify-content: center; align-items: center; gap: clamp(14px, 2vw, 26px); min-height: 46px; flex-wrap: wrap; background: #fff; border-bottom: 1px solid var(--line); padding: 0 clamp(16px, 3vw, 40px); }
+.public-nav a { color: var(--gray); font-size: 12px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.02em; transition: color 160ms ease; }
+.public-nav a:hover, .public-nav a.active { color: var(--teal); }
+
 @media (max-width: 760px) {
   .header-row { grid-template-columns: auto auto; }
   .public-search { display: none; }
+  .nav-burger { display: grid; }
+  /* Colapsado por defecto; .is-open (Header.jsx, toggle del burger) lo abre
+     como panel apilado en vez de fila horizontal -- mas facil de tocar en
+     mobile que una fila que hace wrap. */
+  .public-nav { display: none; }
+  .public-nav.is-open { display: flex; flex-direction: column; align-items: stretch; gap: 2px; padding: 10px clamp(16px, 3vw, 40px) 14px; }
+  .public-nav.is-open a { padding: 10px 4px; border-bottom: 1px solid var(--line-soft); }
+  .public-nav.is-open a:last-child { border-bottom: 0; }
 }
 
 .public-main { max-width: 1240px; margin: 0 auto; padding: 20px clamp(16px, 3vw, 40px) 40px; }

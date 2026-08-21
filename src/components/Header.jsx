@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { Search, MessageCircle } from 'lucide-react';
+import { Search, MessageCircle, Menu, X } from 'lucide-react';
 import { fetchFarettoMenu } from '../lib/api.js';
 
 // Solo 2 rutas reales por ahora (Home y Catalogo, por eso el pedido
@@ -35,6 +35,7 @@ const SCROLL_SOLID_THRESHOLD = 24;
 export function Header({ route, onNavigate }) {
   const [menuItems, setMenuItems] = useState(null); // null = todavia no respondio
   const [isScrolled, setIsScrolled] = useState(false);
+  const [mobileNavOpen, setMobileNavOpen] = useState(false);
 
   useEffect(() => {
     let cancelled = false;
@@ -51,28 +52,47 @@ export function Header({ route, onNavigate }) {
     return () => window.removeEventListener('scroll', onScroll);
   }, []);
 
+  // Se cierra solo al cambiar de ruta (no basta con cerrarlo en el onClick
+  // del link: tambien debe cerrarse si el usuario navega con atras/adelante
+  // del navegador, o si el link clickeado es externo -abre pestaña nueva,
+  // nunca dispara onNavigate-).
+  useEffect(() => {
+    setMobileNavOpen(false);
+  }, [route.pathname, route.search]);
+
   const navLinks = menuItems && menuItems.length > 0 ? menuItems : FALLBACK_NAV_LINKS;
 
   return (
-    <header className={`public-header ${isScrolled ? 'is-scrolled' : ''}`}>
-      <div className="header-row">
-        <a className="brand-logo" href="/" onClick={(event) => { event.preventDefault(); onNavigate('/'); }}>
-          <img className="brand-logo-white" src="/assets/logo-faretto-white.webp" alt="Faretto — Illuminazione e Design" />
-          <img className="brand-logo-color" src="/assets/logo-faretto.webp" alt="" aria-hidden="true" />
-        </a>
-        <div className="public-search">
-          <Search size={18} />
-          <span>Buscar por modelo, SKU o familia</span>
-        </div>
-        <div className="header-icons">
-          {/* Sin cuenta ni carrito propios: este sitio es catalogo, no
-              ecommerce. El unico "CTA de conversion" es cotizar por WhatsApp. */}
-          <a className="icon-btn" href="https://wa.me/" target="_blank" rel="noreferrer" aria-label="Cotizar por WhatsApp">
-            <MessageCircle size={18} />
+    <>
+      <header className={`public-header ${isScrolled ? 'is-scrolled' : ''}`}>
+        <div className="header-row">
+          <a className="brand-logo" href="/" onClick={(event) => { event.preventDefault(); onNavigate('/'); }}>
+            <img className="brand-logo-white" src="/assets/logo-faretto-white.webp" alt="Faretto — Illuminazione e Design" />
+            <img className="brand-logo-color" src="/assets/logo-faretto.webp" alt="" aria-hidden="true" />
           </a>
+          <div className="public-search">
+            <Search size={18} />
+            <span>Buscar por modelo, SKU o familia</span>
+          </div>
+          <div className="header-icons">
+            {/* Sin cuenta ni carrito propios: este sitio es catalogo, no
+                ecommerce. El unico "CTA de conversion" es cotizar por WhatsApp. */}
+            <a className="icon-btn" href="https://wa.me/" target="_blank" rel="noreferrer" aria-label="Cotizar por WhatsApp">
+              <MessageCircle size={18} />
+            </a>
+            <button
+              type="button"
+              className="icon-btn nav-burger"
+              aria-label={mobileNavOpen ? 'Cerrar menú' : 'Abrir menú'}
+              aria-expanded={mobileNavOpen}
+              onClick={() => setMobileNavOpen((current) => !current)}
+            >
+              {mobileNavOpen ? <X size={18} /> : <Menu size={18} />}
+            </button>
+          </div>
         </div>
-      </div>
-      <nav className="public-nav">
+      </header>
+      <nav className={`public-nav ${mobileNavOpen ? 'is-open' : ''}`}>
         {navLinks.map((link) => (
           <a
             key={link.href}
@@ -86,6 +106,6 @@ export function Header({ route, onNavigate }) {
           </a>
         ))}
       </nav>
-    </header>
+    </>
   );
 }
