@@ -197,6 +197,10 @@ a:focus-visible, button:focus-visible, input:focus-visible {
 .blog-post-body img { max-width: 100%; border-radius: 8px; margin: 10px 0; }
 .blog-post-body a { color: var(--teal); text-decoration: underline; }
 
+/* ---- pagina de contenido (ej. quienes-somos) ---- */
+.static-page-image { border-radius: 8px; overflow: hidden; margin-bottom: 22px; border: 1px solid var(--line); }
+.static-page-image img { width: 100%; height: auto; display: block; }
+
 /* ---- category page ---- */
 .breadcrumb { font-size: 11px; color: #8a97a3; text-transform: uppercase; letter-spacing: 0.04em; font-weight: 700; margin: 20px 0 10px; }
 .breadcrumb b { color: var(--teal); font-weight: 800; }

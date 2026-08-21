@@ -7,6 +7,7 @@ import { CategoryPage } from './pages/CategoryPage.jsx';
 import { BlogPage } from './pages/BlogPage.jsx';
 import { BlogPostPage } from './pages/BlogPostPage.jsx';
 import { DistribuidoresPage } from './pages/DistribuidoresPage.jsx';
+import { PaginaPage } from './pages/PaginaPage.jsx';
 import { fetchFarettoProductos } from './lib/api.js';
 
 function parseRoute() {
@@ -44,7 +45,15 @@ export function App() {
   const blogSlugMatch = route.pathname.match(/^\/blog\/([^/]+)\/?$/);
   const blogSlug = blogSlugMatch ? decodeURIComponent(blogSlugMatch[1]) : null;
   const isDistribuidores = route.pathname === '/distribuidores';
-  const isHome = !isCatalogo && !isBlog && !blogSlug && !isDistribuidores;
+  // "/quienes-somos" es un alias directo del slug 'quienes-somos' en la
+  // misma tabla de paginas -- asi calza con el boton ya existente en
+  // Accesos Destacados (url_destino: "quienes-somos") sin tener que
+  // reconfigurar ese boton. Cualquier otra pagina nueva creada en el admin
+  // vive en /pagina/<slug>.
+  const isQuienesSomos = route.pathname === '/quienes-somos';
+  const paginaSlugMatch = route.pathname.match(/^\/pagina\/([^/]+)\/?$/);
+  const paginaSlug = isQuienesSomos ? 'quienes-somos' : (paginaSlugMatch ? decodeURIComponent(paginaSlugMatch[1]) : null);
+  const isHome = !isCatalogo && !isBlog && !blogSlug && !isDistribuidores && !paginaSlug;
 
   return (
     <div>
@@ -65,6 +74,8 @@ export function App() {
           <BlogPostPage slug={blogSlug} onNavigate={navigate} />
         ) : isDistribuidores ? (
           <DistribuidoresPage />
+        ) : paginaSlug ? (
+          <PaginaPage slug={paginaSlug} onNavigate={navigate} />
         ) : (
           // El home no depende del feed de productos para pintar sus
           // secciones (accesos destacados, banners, blog) - solo la franja

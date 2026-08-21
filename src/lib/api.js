@@ -93,6 +93,17 @@ export async function fetchFarettoDistribuidores() {
   return Array.isArray(data.distribuidores) ? data.distribuidores : [];
 }
 
+// Paginas de contenido (ej. /quienes-somos): administrable desde Power Admin
+// > sitio Faretto > grupo Faretto > Páginas.
+export async function fetchFarettoPagina(slug) {
+  const response = await fetch(`${API_BASE}/api/public/faretto-paginas/${encodeURIComponent(slug)}`);
+  if (response.status === 404) return null;
+  if (!response.ok) {
+    throw new Error(`No se pudo cargar la pagina (HTTP ${response.status})`);
+  }
+  return response.json();
+}
+
 // Blog: administrable desde Power Admin > sitio Faretto (mismos articulos que
 // se editan ahi, independientes de los que ya tiene sitio_power - ver
 // listFarettoBlogPublic/getFarettoBlogPostPublic en publicCatalogService.js).
