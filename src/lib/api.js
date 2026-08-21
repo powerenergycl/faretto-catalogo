@@ -104,6 +104,21 @@ export async function fetchFarettoPagina(slug) {
   return response.json();
 }
 
+// Envio del formulario de contacto (/contacto). Los mensajes se revisan
+// desde Power Admin > sitio Faretto > grupo Faretto > Mensajes de contacto.
+export async function submitFarettoContacto(payload) {
+  const response = await fetch(`${API_BASE}/api/public/faretto-contacto`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(payload)
+  });
+  const data = await response.json().catch(() => ({}));
+  if (!response.ok) {
+    throw new Error(data.error || `No se pudo enviar el mensaje (HTTP ${response.status})`);
+  }
+  return data;
+}
+
 // Blog: administrable desde Power Admin > sitio Faretto (mismos articulos que
 // se editan ahi, independientes de los que ya tiene sitio_power - ver
 // listFarettoBlogPublic/getFarettoBlogPostPublic en publicCatalogService.js).

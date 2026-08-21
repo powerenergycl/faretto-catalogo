@@ -8,6 +8,7 @@ import { BlogPage } from './pages/BlogPage.jsx';
 import { BlogPostPage } from './pages/BlogPostPage.jsx';
 import { DistribuidoresPage } from './pages/DistribuidoresPage.jsx';
 import { PaginaPage } from './pages/PaginaPage.jsx';
+import { ContactoPage } from './pages/ContactoPage.jsx';
 import { fetchFarettoProductos } from './lib/api.js';
 
 function parseRoute() {
@@ -53,7 +54,8 @@ export function App() {
   const isQuienesSomos = route.pathname === '/quienes-somos';
   const paginaSlugMatch = route.pathname.match(/^\/pagina\/([^/]+)\/?$/);
   const paginaSlug = isQuienesSomos ? 'quienes-somos' : (paginaSlugMatch ? decodeURIComponent(paginaSlugMatch[1]) : null);
-  const isHome = !isCatalogo && !isBlog && !blogSlug && !isDistribuidores && !paginaSlug;
+  const isContacto = route.pathname === '/contacto';
+  const isHome = !isCatalogo && !isBlog && !blogSlug && !isDistribuidores && !paginaSlug && !isContacto;
 
   return (
     <div>
@@ -76,6 +78,8 @@ export function App() {
           <DistribuidoresPage />
         ) : paginaSlug ? (
           <PaginaPage slug={paginaSlug} onNavigate={navigate} />
+        ) : isContacto ? (
+          <ContactoPage />
         ) : (
           // El home no depende del feed de productos para pintar sus
           // secciones (accesos destacados, banners, blog) - solo la franja

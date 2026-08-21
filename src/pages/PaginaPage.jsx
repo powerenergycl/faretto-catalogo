@@ -41,14 +41,16 @@ export function PaginaPage({ slug, onNavigate }) {
   return (
     <article className="static-page">
       <div className="breadcrumb">Inicio <b>/</b> {pagina.titulo}</div>
-      <h1 className="cat-title">{pagina.titulo}</h1>
-      {pagina.resumen && <p className="cat-description">{pagina.resumen}</p>}
-      {pagina.imagen_url && (
-        <div className="static-page-image">
-          <img src={pagina.imagen_url} alt={pagina.imagen_alt || pagina.titulo} loading="eager" />
-        </div>
-      )}
-      <div className="blog-post-body" dangerouslySetInnerHTML={{ __html: pagina.contenido_html || '' }} />
+      <div className="static-page-card">
+        {pagina.imagen_url && (
+          <div className="static-page-image">
+            <img src={pagina.imagen_url} alt={pagina.imagen_alt || pagina.titulo} loading="eager" />
+          </div>
+        )}
+        <h1 className="cat-title">{pagina.titulo}</h1>
+        {pagina.resumen && <p className="static-page-resumen">{pagina.resumen}</p>}
+        <div className="blog-post-body" dangerouslySetInnerHTML={{ __html: pagina.contenido_html || '' }} />
+      </div>
     </article>
   );
 }
