@@ -59,7 +59,7 @@ export function App() {
 
   return (
     <div>
-      <Header route={route} onNavigate={navigate} />
+      <Header route={route} onNavigate={navigate} productos={productos} />
       {/* Fuera de .public-main a proposito: el hero debe ocupar el ancho
           completo de la pantalla, sin heredar su max-width/padding. */}
       {isHome && <HeroSection onNavigate={navigate} />}

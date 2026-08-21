@@ -69,6 +69,52 @@ a:focus-visible, button:focus-visible, input:focus-visible {
 .public-nav a { color: var(--gray); font-size: 12px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.02em; transition: color 160ms ease; }
 .public-nav a:hover, .public-nav a.active { color: var(--teal); }
 
+/* ---- megamenu de "Categorias" ----
+   Dos paneles: lista de familias a la izquierda (hover/foco cambia cual se
+   previsualiza a la derecha, click navega a esa familia completa), modelos
+   de la familia activa a la derecha (click navega directo al modelo) --
+   pensado para que "Otros" (37 modelos reales en el catalogo, muchos mas
+   que el resto) no rompa el layout: solo una lista a la vez, con su propio
+   scroll si hace falta, en vez de una grilla estatica con una columna
+   gigante junto a columnas de 3-5 items. */
+.mega-menu-item { position: relative; }
+.mega-menu-trigger { display: inline-flex; align-items: center; gap: 5px; background: none; border: 0; padding: 0; margin: 0; font: inherit; color: var(--gray); font-size: 12px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.02em; cursor: pointer; transition: color 160ms ease; }
+.mega-menu-trigger:hover, .mega-menu-trigger.active { color: var(--teal); }
+.mega-menu-chevron { transition: transform 200ms ease; }
+.mega-menu-trigger.active .mega-menu-chevron { transform: rotate(180deg); }
+
+.mega-menu-panel { position: absolute; top: calc(100% + 14px); left: 50%; transform: translateX(-50%) translateY(-6px); width: min(620px, 86vw); background: #fff; border: 1px solid var(--line); border-radius: 12px; box-shadow: 0 24px 56px rgba(0,101,120,0.16); display: grid; grid-template-columns: 200px 1fr; overflow: hidden; opacity: 0; pointer-events: none; transition: opacity 200ms ease, transform 200ms ease; z-index: 50; }
+.mega-menu-panel.is-open { opacity: 1; pointer-events: auto; transform: translateX(-50%) translateY(0); }
+.mega-menu-panel::before { content: ''; position: absolute; top: -6px; left: 50%; transform: translateX(-50%) rotate(45deg); width: 12px; height: 12px; background: #fff; border-left: 1px solid var(--line); border-top: 1px solid var(--line); }
+
+.mega-menu-families { grid-column: 1; grid-row: 1; background: var(--tint-soft); border-right: 1px solid var(--line); padding: 10px; display: grid; gap: 2px; align-content: start; max-height: 380px; overflow-y: auto; }
+.mega-menu-family { display: flex; align-items: center; gap: 10px; width: 100%; background: none; border: 0; border-radius: 8px; padding: 10px 10px; font: inherit; font-size: 13px; font-weight: 700; color: var(--ink); text-align: left; cursor: pointer; transition: background 140ms ease, color 140ms ease; }
+.mega-menu-family svg:first-child { flex: none; color: var(--teal); }
+.mega-menu-family span { flex: 1; }
+.mega-menu-family-chevron { flex: none; color: var(--line-soft); opacity: 0; transform: translateX(-3px); transition: opacity 140ms ease, transform 140ms ease; }
+.mega-menu-family:hover, .mega-menu-family.active { background: #fff; color: var(--teal); box-shadow: 0 6px 16px rgba(0,101,120,0.08); }
+.mega-menu-family.active .mega-menu-family-chevron, .mega-menu-family:hover .mega-menu-family-chevron { opacity: 1; transform: translateX(0); color: var(--teal); }
+
+/* grid-template-columns:1fr explicito (no dejarlo implicito): sin esto la
+   columna unica de este grid no tiene un ancho definido que pasarle a
+   .mega-menu-modelos (grid anidado con auto-fill mas abajo) -- auto-fill
+   no puede calcular cuantas columnas entran sin un ancho de contenedor
+   definido, y los botones de modelo terminaban en 0x0px (mismo bug de fondo
+   que el grid-column/transform de .mega-menu-panel, otra vez un grid sin
+   una dimension explicita que un hijo necesitaba para poder dibujarse). */
+.mega-menu-detail { grid-column: 2; grid-row: 1; grid-template-columns: 1fr; padding: 16px 18px; display: grid; gap: 12px; align-content: start; max-height: 380px; overflow-y: auto; }
+.mega-menu-detail-head { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+.mega-menu-detail-head span { color: var(--teal); font-size: 14px; font-weight: 800; }
+.mega-menu-viewall { display: inline-flex; align-items: center; gap: 5px; background: none; border: 0; padding: 0; font: inherit; font-size: 11.5px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.02em; color: var(--gray); cursor: pointer; transition: color 140ms ease, gap 140ms ease; }
+.mega-menu-viewall:hover { color: var(--teal); gap: 8px; }
+.mega-menu-modelos { display: grid; grid-template-columns: repeat(auto-fill, minmax(128px, 1fr)); gap: 4px 10px; }
+.mega-menu-modelos button { background: none; border: 0; border-radius: 6px; padding: 7px 8px; font: inherit; font-size: 13px; color: var(--ink); text-align: left; cursor: pointer; transition: background 120ms ease, color 120ms ease, padding-left 120ms ease; }
+.mega-menu-modelos button:hover { background: var(--tint-soft); color: var(--teal); padding-left: 12px; }
+.mega-menu-empty { margin: 0; color: var(--gray); font-size: 12.5px; font-style: italic; }
+
+.mega-menu-footer { grid-column: 1 / -1; grid-row: 2; display: flex; align-items: center; justify-content: center; gap: 6px; padding: 12px; border-top: 1px solid var(--line); background: var(--tint-soft); color: var(--teal); font-size: 12px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.02em; transition: background 140ms ease; }
+.mega-menu-footer:hover { background: var(--tint); }
+
 @media (max-width: 760px) {
   .header-row { grid-template-columns: auto auto; }
   .public-search { display: none; }
@@ -80,6 +126,31 @@ a:focus-visible, button:focus-visible, input:focus-visible {
   .public-nav.is-open { display: flex; flex-direction: column; align-items: stretch; gap: 2px; padding: 10px clamp(16px, 3vw, 40px) 14px; }
   .public-nav.is-open a { padding: 10px 4px; border-bottom: 1px solid var(--line-soft); }
   .public-nav.is-open a:last-child { border-bottom: 0; }
+
+  /* El megamenu dentro del panel mobile ya apilado: nada de dropdown
+     flotante ni flechita -- el panel queda "en linea", empujando el resto
+     de la lista hacia abajo, familias y modelos apilados en una columna. */
+  .mega-menu-item { border-bottom: 1px solid var(--line-soft); }
+  .mega-menu-trigger { width: 100%; padding: 10px 4px; justify-content: space-between; }
+  .mega-menu-panel { position: static; transform: none; width: auto; max-width: none; opacity: 1; pointer-events: auto; box-shadow: none; border: 0; border-radius: 0; grid-template-columns: 1fr; display: none; }
+  .mega-menu-panel::before { display: none; }
+  /* transform:none repetido aca (no solo en la regla de arriba): .is-open
+     de la version desktop (.mega-menu-panel.is-open, 2 clases) tiene mas
+     especificidad que el .mega-menu-panel de una clase de esta media query,
+     asi que sin este selector el transform:translateX(-50%) del desktop
+     seguia ganando para la propiedad transform incluso aca -- el panel
+     quedaba centrado y la mitad izquierda literalmente afuera de la
+     pantalla (misma familia de bug que el grid-column de mas abajo). */
+  .mega-menu-panel.is-open { display: grid; transform: none; }
+  /* grid-column:1 en ambas es necesario: sin esto, .mega-menu-detail seguia
+     con el grid-column:2 heredado de la regla desktop, y como el panel aca
+     solo declara 1 columna explicita (grid-template-columns:1fr), el grid
+     creaba una columna implicita extra para poder ubicarlo ahi -- volvia a
+     quedar de 2 columnas aunque grid-template-columns dijera 1fr. */
+  .mega-menu-families, .mega-menu-detail { grid-column: 1; max-height: none; overflow: visible; border-right: 0; }
+  .mega-menu-families { grid-row: 1; padding: 4px 0 8px; }
+  .mega-menu-detail { grid-row: 2; padding: 0 4px 14px; border-top: 1px solid var(--line-soft); }
+  .mega-menu-footer { grid-row: 3; background: none; border-top: 0; padding: 10px 4px 4px; justify-content: flex-start; }
 }
 
 .public-main { max-width: 1240px; margin: 0 auto; padding: 20px clamp(16px, 3vw, 40px) 40px; }
