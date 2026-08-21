@@ -26,8 +26,15 @@ function normalizeMenuItem({ etiqueta, url, tipo }) {
   return { label: etiqueta, href, external };
 }
 
+// Umbral de scroll para pasar de header teal (logo blanco) a header blanco
+// (logo a color): >0 a proposito, no 0 - un scroll de 1-2px por rebote de
+// trackpad/mouse-wheel en el tope de la pagina no debe alternar la clase
+// ida y vuelta.
+const SCROLL_SOLID_THRESHOLD = 24;
+
 export function Header({ route, onNavigate }) {
   const [menuItems, setMenuItems] = useState(null); // null = todavia no respondio
+  const [isScrolled, setIsScrolled] = useState(false);
 
   useEffect(() => {
     let cancelled = false;
@@ -37,13 +44,21 @@ export function Header({ route, onNavigate }) {
     return () => { cancelled = true; };
   }, []);
 
+  useEffect(() => {
+    const onScroll = () => setIsScrolled(window.scrollY > SCROLL_SOLID_THRESHOLD);
+    onScroll(); // por si la pagina carga ya scrolleada (ej. al volver con "atras")
+    window.addEventListener('scroll', onScroll, { passive: true });
+    return () => window.removeEventListener('scroll', onScroll);
+  }, []);
+
   const navLinks = menuItems && menuItems.length > 0 ? menuItems : FALLBACK_NAV_LINKS;
 
   return (
-    <header className="public-header">
+    <header className={`public-header ${isScrolled ? 'is-scrolled' : ''}`}>
       <div className="header-row">
         <a className="brand-logo" href="/" onClick={(event) => { event.preventDefault(); onNavigate('/'); }}>
-          <img src="/assets/logo-faretto.webp" alt="Faretto — Illuminazione e Design" />
+          <img className="brand-logo-white" src="/assets/logo-faretto-white.webp" alt="Faretto — Illuminazione e Design" />
+          <img className="brand-logo-color" src="/assets/logo-faretto.webp" alt="" aria-hidden="true" />
         </a>
         <div className="public-search">
           <Search size={18} />

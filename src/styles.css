@@ -35,19 +35,36 @@ a:focus-visible, button:focus-visible, input:focus-visible {
   * { transition: none !important; }
 }
 
-/* ---- header ---- */
-.public-header { position: sticky; top: 0; z-index: 40; background: rgba(255,255,255,0.97); border-bottom: 1px solid var(--line); padding: 12px clamp(16px, 3vw, 40px) 0; display: grid; gap: 8px; backdrop-filter: blur(10px); }
+/* ---- header ----
+   Por defecto (tope de la pagina): fondo teal solido, logo blanco. Al hacer
+   scroll (.is-scrolled, ver Header.jsx) pasa a fondo blanco con el logo a
+   color -- el mismo patron de header que "se define" al bajar. Los colores
+   de nav/borde se transicionan junto con el fondo; buscador y boton de
+   WhatsApp quedan igual en los dos estados (son su propia "isla" clara/
+   blanca, funcionan bien sobre cualquiera de los dos fondos). */
+.public-header { position: sticky; top: 0; z-index: 40; background: var(--teal); border-bottom: 1px solid transparent; padding: 12px clamp(16px, 3vw, 40px) 0; display: grid; gap: 8px; backdrop-filter: blur(10px); transition: background-color 240ms ease, border-color 240ms ease; }
+.public-header.is-scrolled { background: rgba(255,255,255,0.97); border-bottom-color: var(--line); }
 .header-row { display: grid; grid-template-columns: auto 1fr auto; align-items: center; gap: 22px; }
-.brand-logo { display: flex; align-items: center; }
-.brand-logo img { height: 40px; width: auto; }
+/* display:grid + grid-area:1/1 en ambas imagenes (no position:absolute): asi
+   siguen contando como contenido "en flujo" para el sizing del contenedor
+   -- con absolute quedarian fuera del calculo y .brand-logo colapsaria a
+   ancho 0 (grid-template-columns: auto en .header-row no tendria de que
+   tomar la medida). */
+.brand-logo { display: grid; align-items: center; height: 40px; }
+.brand-logo img { grid-area: 1 / 1; height: 40px; width: auto; transition: opacity 220ms ease; }
+.brand-logo-color { opacity: 0; }
+.is-scrolled .brand-logo-white { opacity: 0; }
+.is-scrolled .brand-logo-color { opacity: 1; }
 .public-search { display: flex; align-items: center; gap: 10px; border: 1px solid var(--line-soft); background: #f7fafc; color: var(--gray); border-radius: 8px; padding: 12px 14px; }
 .public-search svg { flex: none; color: var(--gray); }
 .public-search span { color: #8a97a3; font-size: 14px; }
 .header-icons { display: flex; align-items: center; gap: 10px; }
 .icon-btn { width: 40px; height: 40px; display: grid; place-items: center; border: 1px solid var(--line-soft); border-radius: 999px; background: #fff; color: var(--teal); }
 .public-nav { display: flex; justify-content: center; align-items: center; gap: clamp(14px, 2vw, 26px); min-height: 44px; flex-wrap: wrap; }
-.public-nav a { color: var(--gray); font-size: 12px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.02em; }
-.public-nav a:hover, .public-nav a.active { color: var(--teal); }
+.public-nav a { color: rgba(255,255,255,0.8); font-size: 12px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.02em; transition: color 240ms ease; }
+.public-nav a:hover, .public-nav a.active { color: #fff; }
+.is-scrolled .public-nav a { color: var(--gray); }
+.is-scrolled .public-nav a:hover, .is-scrolled .public-nav a.active { color: var(--teal); }
 @media (max-width: 760px) {
   .header-row { grid-template-columns: auto auto; }
   .public-search { display: none; }
