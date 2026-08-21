@@ -105,17 +105,23 @@ a:focus-visible, button:focus-visible, input:focus-visible {
    de la imagen (object-fit: contain la centra en esa altura de mas). */
 .home-banner-tile { position: relative; border-radius: 8px; overflow: hidden; background: var(--tint-soft); border: 1px dashed var(--line-soft); display: grid; place-items: center; color: #9aa6bb; align-self: start; }
 /* "vertical" queda en su medida real (948x1024px - 3 de los 4 banners de
-   referencia son de esta forma, la mas repetida). "wide" NO usa su propia
-   medida real (1024x658, ratio 1.56) porque con 4 columnas iguales eso da
-   una altura ~19% menor a la de vertical en la misma fila - align-self:start
-   (linea de arriba) no estira el mas corto para compensar, asi que quedaba
-   un hueco vacio debajo (el mismo bug del "hueco" de antes, pero al reves).
-   En cambio se calcula el ratio de "wide" para que su alto de caja coincida
-   exacto con el de "vertical" a igual ancho de columna: 2 * (948/1024) =
-   1896/1024. El banner ancho real (1024x658) se recorta un poco mas por los
-   costados via object-fit:cover en .has-banner-image, pero sin dejar hueco.
+   referencia son de esta forma, la mas repetida) y es quien define el alto
+   real de la fila (via su aspect-ratio + align-self:start heredado de
+   arriba). "wide" NO usa un aspect-ratio fijo -- se probo eso antes
+   (2 * 948/1024 = 1896/1024, asumiendo que su ancho es exactamente el doble
+   del de "vertical") pero quedaba ~6px mas alto que "vertical" en cada fila:
+   ese calculo no contempla el gap de 12px entre las 2 columnas que "wide"
+   abarca (su ancho real es 2*columna + gap, no 2*columna), y como el gap es
+   en px fijos mientras la columna es fluida (1fr), ninguna razon fija puede
+   calzar exacto en todos los anchos de pantalla a la vez -- solo por
+   casualidad en uno especifico. En cambio "wide" se estira (align-self:
+   stretch, pisando el :start heredado solo aca) al alto real que termine
+   teniendo la fila -- siempre exacto, sin importar el ancho de pantalla,
+   porque CSS Grid ya sabe cual es esa altura (la definen los "vertical" de
+   la misma fila). object-fit:cover en .has-banner-image sigue recortando el
+   banner ancho real por los costados para llenar esa altura sin deformarlo.
    "square" no tiene banner real de referencia todavia - se deja 1:1 literal. */
-.home-banner-tile.wide { grid-column: span 2; aspect-ratio: 1896 / 1024; }
+.home-banner-tile.wide { grid-column: span 2; align-self: stretch; }
 .home-banner-tile.vertical { aspect-ratio: 948 / 1024; }
 .home-banner-tile.square { aspect-ratio: 1 / 1; }
 /* position:absolute + inset:0 (no width/height:100% con align-self:stretch,
