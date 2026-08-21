@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { ImageOff, Newspaper } from 'lucide-react';
+import { ImageOff, Newspaper, ChevronRight } from 'lucide-react';
 import { fetchFarettoAccesos, fetchFarettoHomeLayout, fetchFarettoBanners, fetchFarettoBlog, FARETTO_HOME_LAYOUT_DEFAULT, FAMILIES, resolveFamily, cleanSpecValue } from '../lib/api.js';
 import { AccessIcon } from '../lib/accessIcons.jsx';
 import { formatBlogDate } from './BlogPage.jsx';
@@ -107,8 +107,9 @@ function QuickLink({ nombre, icono, url_destino, onNavigate }) {
       rel={external ? 'noreferrer' : undefined}
       onClick={external ? undefined : (event) => { event.preventDefault(); onNavigate(url_destino); }}
     >
-      <AccessIcon name={icono} size={18} />
-      <span>{nombre}</span>
+      <span className="home-quicklink-icon"><AccessIcon name={icono} size={19} /></span>
+      <span className="home-quicklink-label">{nombre}</span>
+      <ChevronRight className="home-quicklink-chevron" size={16} />
     </a>
   );
 }
