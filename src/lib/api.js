@@ -82,6 +82,17 @@ export async function fetchFarettoHeroSlides() {
   return Array.isArray(data.slides) ? data.slides : [];
 }
 
+// Directorio de distribuidores (/distribuidores): administrable desde Power
+// Admin > sitio Faretto > grupo Faretto > Distribuidores.
+export async function fetchFarettoDistribuidores() {
+  const response = await fetch(`${API_BASE}/api/public/faretto-distribuidores`);
+  if (!response.ok) {
+    throw new Error(`No se pudo cargar el directorio (HTTP ${response.status})`);
+  }
+  const data = await response.json();
+  return Array.isArray(data.distribuidores) ? data.distribuidores : [];
+}
+
 // Blog: administrable desde Power Admin > sitio Faretto (mismos articulos que
 // se editan ahi, independientes de los que ya tiene sitio_power - ver
 // listFarettoBlogPublic/getFarettoBlogPostPublic en publicCatalogService.js).
