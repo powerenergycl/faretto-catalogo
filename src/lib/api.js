@@ -205,7 +205,14 @@ export function resolveModelo(nombre = '') {
 // limpiarlos, son la misma pieza. Sin "Modelo" en el nombre no hay como
 // confirmar que dos productos sean variantes entre si, asi que esos quedan
 // siempre solos (nunca se agrupan por similitud de texto sola).
-const VARIANT_WORD_PATTERN = /\b(ip\d{2}|\d+(?:[.,]\d+)?\s*w|\d{3,4}\s*k|luz\s+(?:fría|fria|cálida|calida|neutra|neutro))\b/gi;
+// El color/temperatura de luz no siempre viene como "luz fría/neutra/cálida"
+// (frase completa) - varios nombres reales lo traen como adjetivo suelto
+// ("... Redondo 12W Fría Económico ...", "... 18W Frío Económico ...") e
+// incluso sin tilde ("Luz Frio"). Sin cubrir esas formas, cada temperatura
+// quedaba con un "nombre generico" distinto y se armaba una ficha separada
+// por temperatura en vez de una fila mas en la tabla de variantes (ver
+// modelo Corvus: Fría/Neutro/Frío terminaban en 3 tarjetas sueltas).
+const VARIANT_WORD_PATTERN = /\b(ip\d{2}|\d+(?:[.,]\d+)?\s*w|\d{3,4}\s*k|(?:luz\s+)?(?:fr[ií]a|fr[ií]o|c[aá]lida|c[aá]lido|neutra|neutro))\b/gi;
 
 function stripVariantWords(text = '') {
   return text
