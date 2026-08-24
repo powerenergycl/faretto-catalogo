@@ -9,7 +9,7 @@ import { BlogPostPage } from './pages/BlogPostPage.jsx';
 import { DistribuidoresPage } from './pages/DistribuidoresPage.jsx';
 import { PaginaPage } from './pages/PaginaPage.jsx';
 import { ContactoPage } from './pages/ContactoPage.jsx';
-import { fetchFarettoProductos } from './lib/api.js';
+import { fetchFarettoProductos, fetchFarettoGaleria } from './lib/api.js';
 
 function parseRoute() {
   return { pathname: window.location.pathname, search: window.location.search };
@@ -19,6 +19,7 @@ export function App() {
   const [route, setRoute] = useState(parseRoute);
   const [productos, setProductos] = useState([]);
   const [status, setStatus] = useState('loading');
+  const [galeriaGrupos, setGaleriaGrupos] = useState([]);
 
   useEffect(() => {
     const onPopState = () => setRoute(parseRoute());
@@ -31,6 +32,14 @@ export function App() {
     fetchFarettoProductos()
       .then((data) => { if (!cancelled) { setProductos(data); setStatus('ready'); } })
       .catch(() => { if (!cancelled) setStatus('error'); });
+    return () => { cancelled = true; };
+  }, []);
+
+  useEffect(() => {
+    let cancelled = false;
+    // Nunca debe tumbar el catalogo: fetchFarettoGaleria ya devuelve []
+    // sola si la carga falla.
+    fetchFarettoGaleria().then((data) => { if (!cancelled) setGaleriaGrupos(data); });
     return () => { cancelled = true; };
   }, []);
 
@@ -68,7 +77,7 @@ export function App() {
           <>
             {status === 'loading' && <div className="state-box">Cargando catálogo…</div>}
             {status === 'error' && <div className="state-box">No se pudo cargar el catálogo. Intenta de nuevo más tarde.</div>}
-            {status === 'ready' && <CategoryPage productos={productos} route={route} onNavigate={navigate} />}
+            {status === 'ready' && <CategoryPage productos={productos} galeriaGrupos={galeriaGrupos} route={route} onNavigate={navigate} />}
           </>
         ) : isBlog ? (
           <BlogPage onNavigate={navigate} />

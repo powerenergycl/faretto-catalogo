@@ -4,7 +4,7 @@ import { FAMILIES, resolveFamily, resolveModelo, buildProductGroups } from '../l
 
 const PAGE_SIZE = 24;
 
-export function CategoryPage({ productos, route, onNavigate }) {
+export function CategoryPage({ productos, galeriaGrupos, route, onNavigate }) {
   const params = new URLSearchParams(route.search);
   const activeFamily = params.get('familia') || '';
   const activeModelo = params.get('modelo') || '';
@@ -36,7 +36,7 @@ export function CategoryPage({ productos, route, onNavigate }) {
 
   // La ficha ahora es por "modelo" (1 foto + tabla de variantes), no por SKU
   // - varios SKU del feed se agrupan en una sola ficha (ver buildProductGroups).
-  const fichas = useMemo(() => buildProductGroups(filtered), [filtered]);
+  const fichas = useMemo(() => buildProductGroups(filtered, galeriaGrupos), [filtered, galeriaGrupos]);
   const visible = fichas.slice(0, visibleCount);
   const activeFamilyLabel = FAMILIES.find((family) => family.id === activeFamily)?.label;
 

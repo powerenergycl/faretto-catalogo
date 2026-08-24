@@ -16,6 +16,20 @@ export async function fetchFarettoProductos() {
   return Array.isArray(data.productos) ? data.productos : [];
 }
 
+// Galeria de fichas (6 fotos por familia+modelo): administrable desde Power
+// Admin > sitio Faretto > Galeria de producto. Vive aparte de "imagen" (la
+// foto principal, atada a un SKU en el feed de arriba) porque pertenece al
+// "producto principal" que agrupa varias potencias/temperaturas, no a una
+// variante puntual - ver buildProductGroups mas abajo, que la matchea por
+// familyId + modelo. Si el fetch falla, la ficha simplemente no muestra
+// galeria (nunca debe tumbar el catalogo).
+export async function fetchFarettoGaleria() {
+  const response = await fetch(`${API_BASE}/api/public/faretto-galeria`);
+  if (!response.ok) return [];
+  const data = await response.json();
+  return Array.isArray(data.grupos) ? data.grupos : [];
+}
+
 // Accesos destacados del home: administrables desde el panel de sitio_power
 // (Power Admin > sitio Faretto > Accesos destacados). Si el fetch falla o
 // todavia no hay ninguno cargado, HomePage cae a una lista fija propia -
@@ -256,7 +270,7 @@ function parseLeadingNumber(valor) {
   return match ? Number(match[1].replace(',', '.')) : null;
 }
 
-function buildFichaFromGroup(group) {
+function buildFichaFromGroup(group, galeriaByKey) {
   const { members } = group;
 
   // Specs presentes en TODOS los miembros con el mismo valor -> icono
@@ -335,20 +349,12 @@ function buildFichaFromGroup(group) {
     });
 
   // Galeria (instalacion, detalle, empaque): administrable desde Power Admin
-  // > Faretto > Galeria de producto, por SKU. Se junta la de todos los SKU
-  // del grupo (no solo el primero) porque el admin puede haber subido las
-  // fotos a cualquier variante del modelo - da lo mismo cual, son la misma
-  // pieza fisica. Se deduplica por URL por si dos SKU comparten alguna foto,
-  // y se limita a 6 (tamaño fijo de la grilla de la ficha).
-  const galeria = [];
-  const seenGaleriaUrls = new Set();
-  for (const product of members) {
-    for (const url of product.galeria || []) {
-      if (seenGaleriaUrls.has(url)) continue;
-      seenGaleriaUrls.add(url);
-      galeria.push(url);
-    }
-  }
+  // > Faretto > Galeria de producto, por familia+modelo (no por SKU - le
+  // pertenece al "producto principal" de la ficha, no a una variante
+  // puntual). Se busca por la misma clave familyId+modelo que arma
+  // buildProductGroups mas abajo, y se limita a 6 (tamaño fijo de la grilla).
+  const galeriaKey = `${group.familyId}::${normalizeForKey(group.modelo)}`;
+  const galeria = (galeriaByKey.get(galeriaKey) || []).slice(0, 6);
 
   return {
     ...group,
@@ -357,11 +363,23 @@ function buildFichaFromGroup(group) {
     hasTemperatura: members.some((product) => getSpecValue(product, SPEC_LABEL_TEMPERATURA)),
     rows,
     skuCount: members.length,
-    galeria: galeria.slice(0, 6)
+    galeria
   };
 }
 
-export function buildProductGroups(productos = []) {
+// galeriaGrupos: [{familia, modelo, fotos}] desde /api/public/faretto-galeria
+// (ver fetchFarettoGaleria) - se arma una sola vez como lookup por
+// familyId+modelo, misma clave que usa cada ficha.
+function buildGaleriaLookup(galeriaGrupos = []) {
+  const byKey = new Map();
+  for (const { familia, modelo, fotos } of galeriaGrupos) {
+    byKey.set(`${familia}::${normalizeForKey(modelo)}`, fotos || []);
+  }
+  return byKey;
+}
+
+export function buildProductGroups(productos = [], galeriaGrupos = []) {
+  const galeriaByKey = buildGaleriaLookup(galeriaGrupos);
   const groups = new Map();
 
   for (const product of productos) {
@@ -393,5 +411,5 @@ export function buildProductGroups(productos = []) {
     groups.get(key).members.push(product);
   }
 
-  return [...groups.values()].map(buildFichaFromGroup);
+  return [...groups.values()].map((group) => buildFichaFromGroup(group, galeriaByKey));
 }
