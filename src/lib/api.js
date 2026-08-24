@@ -232,6 +232,15 @@ function normalizeForKey(text) {
 const SPEC_LABEL_HIDDEN = 'tipo de luz';
 const SPEC_LABEL_TEMPERATURA = 'temperatura';
 const SPEC_LABEL_POTENCIA = 'potencia';
+const SPEC_LABEL_MEDIDAS = 'medidas';
+
+// Columna fija de la tabla (junto con SKU y Temperatura, que ya son
+// siempre-tabla mas abajo): pedido explicito, independiente de si el valor
+// de hecho varia entre los SKU del grupo. Potencia y Medidas casi siempre
+// cambian por potencia de todos modos, pero si un modelo puntual viene en
+// una sola potencia/medida no debe "ascender" a icono - el catalogo espera
+// verlas siempre en la tabla de variantes.
+const SPEC_LABELS_ALWAYS_TABLE = new Set([SPEC_LABEL_POTENCIA, SPEC_LABEL_MEDIDAS]);
 
 // Color de luz para el circulo de la ficha - solo las 3 categorias fijas
 // tienen un color representativo; "RGB" y valores raros/enmascarados no.
@@ -294,7 +303,7 @@ function buildFichaFromGroup(group, galeriaByKey) {
     // Comparacion normalizada (case/espacios) - "6w" y "6W" son el mismo
     // dato, no deberian contar como "varia entre SKU".
     const allSame = values[0] !== null && values.every((valor) => normalizeForKey(valor) === normalizeForKey(values[0]));
-    if (allSame) {
+    if (allSame && !SPEC_LABELS_ALWAYS_TABLE.has(labelLower)) {
       sharedSpecs.push({ label, valor: values[0] });
     } else {
       varyingLabels.push(label);
@@ -397,7 +406,11 @@ export function buildProductGroups(productos = [], galeriaGrupos = []) {
     if (modelo) {
       const nombreSinModelo = product.nombre.replace(MODELO_RULE, '').trim();
       genericBase = stripVariantWords(nombreSinModelo) || nombreSinModelo;
-      titulo = `${genericBase} Modelo ${modelo}`;
+      // El modelo ya se muestra aparte (barra superior de la ficha /
+      // breadcrumb de CategoryPage) - repetirlo en el titulo de cada tarjeta
+      // es redundante, sobre todo cuando un modelo agrupa varias tarjetas
+      // (una por forma/color) bajo la misma barra "Modelo X".
+      titulo = genericBase;
     } else {
       titulo = product.nombre;
     }
