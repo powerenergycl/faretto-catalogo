@@ -34,13 +34,22 @@ export function ProductCard({ ficha }) {
       </div>
 
       {/* Galeria de fotos del producto (instalacion, detalle, empaque, etc.) -
-          contenido pendiente de admin, por ahora placeholders 1:1. */}
+          administrable desde Power Admin > Faretto > Galeria de producto.
+          Se completa hasta 6 casilleros con placeholders para que la grilla
+          no salte de tamaño mientras se van cargando fotos de a poco. */}
       <div className="product-sheet-gallery">
-        {Array.from({ length: 6 }).map((_, i) => (
-          <div className="product-sheet-gallery-tile" key={i}>
-            <ImageOff size={18} />
-          </div>
-        ))}
+        {Array.from({ length: 6 }).map((_, i) => {
+          const url = (ficha.galeria || [])[i];
+          return (
+            <div className="product-sheet-gallery-tile" key={i}>
+              {url ? (
+                <a href={url} target="_blank" rel="noreferrer">
+                  <img src={url} alt={`${ficha.titulo} - foto ${i + 1}`} loading="lazy" />
+                </a>
+              ) : <ImageOff size={18} />}
+            </div>
+          );
+        })}
       </div>
 
       {sharedSpecs.length > 0 && (

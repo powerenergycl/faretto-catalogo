@@ -334,13 +334,30 @@ function buildFichaFromGroup(group) {
       };
     });
 
+  // Galeria (instalacion, detalle, empaque): administrable desde Power Admin
+  // > Faretto > Galeria de producto, por SKU. Se junta la de todos los SKU
+  // del grupo (no solo el primero) porque el admin puede haber subido las
+  // fotos a cualquier variante del modelo - da lo mismo cual, son la misma
+  // pieza fisica. Se deduplica por URL por si dos SKU comparten alguna foto,
+  // y se limita a 6 (tamaño fijo de la grilla de la ficha).
+  const galeria = [];
+  const seenGaleriaUrls = new Set();
+  for (const product of members) {
+    for (const url of product.galeria || []) {
+      if (seenGaleriaUrls.has(url)) continue;
+      seenGaleriaUrls.add(url);
+      galeria.push(url);
+    }
+  }
+
   return {
     ...group,
     sharedSpecs,
     columns: varyingLabels,
     hasTemperatura: members.some((product) => getSpecValue(product, SPEC_LABEL_TEMPERATURA)),
     rows,
-    skuCount: members.length
+    skuCount: members.length,
+    galeria: galeria.slice(0, 6)
   };
 }
 
