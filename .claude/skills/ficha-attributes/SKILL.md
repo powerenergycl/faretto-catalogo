@@ -6,20 +6,26 @@ description: Audita o explica cómo se reparten los atributos de una ficha Faret
 # Distribución de atributos en la ficha Faretto
 
 Cada ficha de producto agrupa varios SKU que son la misma pieza física en
-distintas variantes (potencia, temperatura de color). La regla que decide
-dónde va cada atributo es puramente por **si el valor es igual en TODOS los
-SKU del grupo o no** — no hay una lista fija de "estos atributos siempre son
-ícono" ni "estos siempre son tabla".
+distintas variantes (potencia, temperatura de color). Para casi todos los
+atributos, la regla es por **si el valor es igual en TODOS los SKU del
+grupo o no** — pero hay una lista fija y deliberada de excepciones
+(`SPEC_LABELS_ALWAYS_TABLE`, ver más abajo) que van siempre a tabla aunque
+no varíen. Fuera de esa lista, no hardcodear nada más.
 
 ## La regla
 
 1. **Ícono compartido** (arriba de la ficha, se muestra una sola vez): el
    atributo tiene el mismo valor, normalizado (case/espacios), en **todos**
-   los miembros del grupo. Ejemplos típicos: Voltaje, CRI, Garantía — pero
-   cualquier atributo puede terminar aquí si de hecho no varía en ese modelo
-   puntual (incluida Potencia, si el modelo solo viene en una potencia).
+   los miembros del grupo, Y no está en `SPEC_LABELS_ALWAYS_TABLE`. Ejemplos
+   típicos: Voltaje, CRI, Garantía, Driver, Grado de Protección — cualquier
+   atributo fuera de la lista fija puede terminar aquí si de hecho no varía
+   en ese modelo puntual.
 2. **Columna de tabla** (una fila por variante): el atributo varía entre al
-   menos dos SKU del grupo, o falta en algunos y está presente en otros.
+   menos dos SKU del grupo, o falta en algunos y está presente en otros — O
+   está en `SPEC_LABELS_ALWAYS_TABLE` (hoy: **Potencia** y **Medidas**,
+   pedido explícito de negocio 2026-08-24: el catálogo siempre quiere verlas
+   en la tabla de variantes, aunque un modelo puntual solo venga en una
+   potencia/medida y "podría" ascender a ícono).
 3. **SKU y Temperatura** son siempre parte de la tabla, nunca íconos — SKU
    porque identifica la fila, Temperatura porque es la dimensión que se
    apila dentro de cada fila (varios SKU comparten fila si solo difieren en
@@ -31,6 +37,10 @@ SKU del grupo o no** — no hay una lista fija de "estos atributos siempre son
    en este catálogo. Dentro de cada fila, los SKU se apilan ordenados por
    Temperatura descendente (más frío primero, ej. 6500K, 6000K, 4000K,
    3000K).
+6. El **título** de la ficha (`ficha.titulo`) ya NO incluye "Modelo X" — el
+   modelo se muestra aparte (barra superior de la ficha / breadcrumb de
+   `CategoryPage.jsx`), así que repetirlo en cada tarjeta agrupada bajo esa
+   barra era redundante.
 
 ## Dónde vive esto
 
@@ -47,8 +57,10 @@ propia.
 ## Cómo auditar (verificar que no haya inconsistencias)
 
 Bajar el feed público y correr `buildProductGroups` contra él, chequeando
-que ningún spec realmente constante haya quedado en `columns` y que ningún
-spec que realmente varía haya quedado en `sharedSpecs`:
+que ningún spec realmente constante haya quedado en `columns` (salvo
+Potencia/Medidas, que deben estar ahí siempre) y que ningún spec que
+realmente varía haya quedado en `sharedSpecs` (y que Potencia/Medidas nunca
+terminen en `sharedSpecs`):
 
 ```bash
 curl -s https://powerenergy.cl/api/public/faretto-productos -o feed.json
@@ -64,12 +76,13 @@ import fs from 'fs';
 const { productos } = JSON.parse(fs.readFileSync('./feed.json', 'utf8'));
 const groups = buildProductGroups(productos);
 
+const ALWAYS_TABLE = new Set(['potencia', 'medidas']); // ver SPEC_LABELS_ALWAYS_TABLE en api.js
 let problems = 0;
 for (const g of groups) {
   for (const col of g.columns) {
     const values = g.members.map(m => (m.specs || []).find(s => s.label === col)?.valor);
     const norm = values.map(v => String(v || '').trim().toLowerCase());
-    if (norm[0] && norm.every(v => v === norm[0])) {
+    if (norm[0] && norm.every(v => v === norm[0]) && !ALWAYS_TABLE.has(col.toLowerCase())) {
       console.log('DEBERIA SER ICONO pero quedo en tabla:', g.titulo, '|', col);
       problems++;
     }
@@ -77,7 +90,7 @@ for (const g of groups) {
   for (const s of g.sharedSpecs) {
     const values = g.members.map(m => (m.specs || []).find(x => x.label === s.label)?.valor);
     const norm = values.map(v => String(v || '').trim().toLowerCase());
-    if (!(norm[0] && norm.every(v => v === norm[0]))) {
+    if (!(norm[0] && norm.every(v => v === norm[0])) || ALWAYS_TABLE.has(s.label.toLowerCase())) {
       console.log('DEBERIA SER TABLA pero quedo en icono:', g.titulo, '|', s.label);
       problems++;
     }
@@ -92,9 +105,9 @@ ya pasó una vez, ver `normalizeForKey` en el mismo archivo).
 
 ## Qué NO hacer
 
-- No hardcodear una lista de labels "que siempre van a tabla" o "que
-  siempre van a ícono" — eso rompe en cuanto un modelo tenga un caso
-  distinto (ej. un modelo de una sola potencia donde Potencia sí es
-  constante).
+- No agregar más labels a `SPEC_LABELS_ALWAYS_TABLE` sin que sea un pedido
+  explícito de negocio — la regla por defecto sigue siendo "varía → tabla,
+  constante → ícono"; Potencia/Medidas son una excepción documentada, no el
+  patrón a seguir para cualquier atributo nuevo.
 - No tocar la clasificación sin volver a correr la auditoría de arriba
   contra datos reales del feed.
