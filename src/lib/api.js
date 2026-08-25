@@ -369,14 +369,17 @@ function buildFichaFromGroup(group, galeriaByKey) {
   // pertenece al "producto principal" de la ficha, no a una variante
   // puntual). Se busca por la misma clave familyId+modelo que arma
   // buildProductGroups mas abajo, y se limita a 6 (tamaño fijo de la grilla).
-  // La foto #1 de este arreglo hace doble funcion: es a la vez la foto
-  // grande del encabezado Y el primer casillero de la grilla (no se salta -
-  // "queda por defecto" ahi, el gestor solo deja 5 casilleros mas por
-  // cargar). Mientras un modelo no tenga fotos cargadas en el gestor nuevo,
-  // se cae al "imagen" viejo (por SKU, ver group.imagen) para no dejar sin
-  // foto de golpe a los modelos que todavia no se migran.
+  // La foto #1 de este arreglo hace doble funcion: es a la vez ficha.imagen
+  // Y el primer casillero de la grilla - no se salta, "queda por defecto"
+  // ahi. Mientras un modelo no tenga fotos cargadas en el gestor nuevo
+  // (todavia la mayoria del catalogo), el casillero #1 cae al "imagen" viejo
+  // (por SKU, ver group.imagen) en vez de dejar la grilla entera vacia -
+  // antes ese fallback solo alimentaba el encabezado grande, que ahora esta
+  // oculto (ver SHOW_HEADER_PHOTO en ProductCard.jsx), asi que sin este
+  // fallback la grilla se quedaba sin ninguna foto.
   const galeriaKey = `${group.familyId}::${normalizeForKey(group.modelo)}`;
-  const galeria = (galeriaByKey.get(galeriaKey) || []).slice(0, 6);
+  const galeriaDelModelo = galeriaByKey.get(galeriaKey) || [];
+  const galeria = (galeriaDelModelo.length > 0 ? galeriaDelModelo : [group.imagen].filter(Boolean)).slice(0, 6);
 
   return {
     ...group,
