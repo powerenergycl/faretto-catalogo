@@ -365,19 +365,22 @@ function buildFichaFromGroup(group, galeriaByKey) {
     });
 
   // Galeria (instalacion, detalle, empaque): administrable desde Power Admin
-  // > Faretto > Galeria de producto, por familia+modelo (no por SKU - le
-  // pertenece al "producto principal" de la ficha, no a una variante
-  // puntual). Se busca por la misma clave familyId+modelo que arma
-  // buildProductGroups mas abajo, y se limita a 6 (tamaño fijo de la grilla).
+  // > Faretto > Galeria de producto, por familia+modelo+producto principal
+  // (no por SKU - le pertenece al "producto principal" de la ficha, no a
+  // una variante puntual). Se busca por familyId+modelo+titulo - un mismo
+  // Modelo puede agrupar varios productos principales fisicamente distintos
+  // (ej. "Draco Sob" tiene Cuadrado, Cuadrado Blanco y Redondo, cada uno su
+  // propia ficha/titulo), asi que el titulo es parte de la clave, no solo
+  // el modelo. Se limita a 6 (tamaño fijo de la grilla).
   // La foto #1 de este arreglo hace doble funcion: es a la vez ficha.imagen
   // Y el primer casillero de la grilla - no se salta, "queda por defecto"
-  // ahi. Mientras un modelo no tenga fotos cargadas en el gestor nuevo
+  // ahi. Mientras esta ficha no tenga fotos cargadas en el gestor nuevo
   // (todavia la mayoria del catalogo), el casillero #1 cae al "imagen" viejo
   // (por SKU, ver group.imagen) en vez de dejar la grilla entera vacia -
   // antes ese fallback solo alimentaba el encabezado grande, que ahora esta
   // oculto (ver SHOW_HEADER_PHOTO en ProductCard.jsx), asi que sin este
   // fallback la grilla se quedaba sin ninguna foto.
-  const galeriaKey = `${group.familyId}::${normalizeForKey(group.modelo)}`;
+  const galeriaKey = `${group.familyId}::${normalizeForKey(group.modelo)}::${normalizeForKey(group.titulo)}`;
   const galeriaDelModelo = galeriaByKey.get(galeriaKey) || [];
   const galeria = (galeriaDelModelo.length > 0 ? galeriaDelModelo : [group.imagen].filter(Boolean)).slice(0, 6);
 
@@ -393,13 +396,14 @@ function buildFichaFromGroup(group, galeriaByKey) {
   };
 }
 
-// galeriaGrupos: [{familia, modelo, fotos}] desde /api/public/faretto-galeria
-// (ver fetchFarettoGaleria) - se arma una sola vez como lookup por
-// familyId+modelo, misma clave que usa cada ficha.
+// galeriaGrupos: [{familia, modelo, productoPrincipal, fotos}] desde
+// /api/public/faretto-galeria (ver fetchFarettoGaleria) - se arma una sola
+// vez como lookup por familyId+modelo+productoPrincipal, misma clave
+// (familyId+modelo+titulo) que usa cada ficha.
 function buildGaleriaLookup(galeriaGrupos = []) {
   const byKey = new Map();
-  for (const { familia, modelo, fotos } of galeriaGrupos) {
-    byKey.set(`${familia}::${normalizeForKey(modelo)}`, fotos || []);
+  for (const { familia, modelo, productoPrincipal, fotos } of galeriaGrupos) {
+    byKey.set(`${familia}::${normalizeForKey(modelo)}::${normalizeForKey(productoPrincipal)}`, fotos || []);
   }
   return byKey;
 }
