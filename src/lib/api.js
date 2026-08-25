@@ -369,6 +369,12 @@ function buildFichaFromGroup(group, galeriaByKey) {
   // pertenece al "producto principal" de la ficha, no a una variante
   // puntual). Se busca por la misma clave familyId+modelo que arma
   // buildProductGroups mas abajo, y se limita a 6 (tamaño fijo de la grilla).
+  // La foto #1 de este arreglo hace doble funcion: es a la vez la foto
+  // grande del encabezado Y el primer casillero de la grilla (no se salta -
+  // "queda por defecto" ahi, el gestor solo deja 5 casilleros mas por
+  // cargar). Mientras un modelo no tenga fotos cargadas en el gestor nuevo,
+  // se cae al "imagen" viejo (por SKU, ver group.imagen) para no dejar sin
+  // foto de golpe a los modelos que todavia no se migran.
   const galeriaKey = `${group.familyId}::${normalizeForKey(group.modelo)}`;
   const galeria = (galeriaByKey.get(galeriaKey) || []).slice(0, 6);
 
@@ -379,6 +385,7 @@ function buildFichaFromGroup(group, galeriaByKey) {
     hasTemperatura: members.some((product) => getSpecValue(product, SPEC_LABEL_TEMPERATURA)),
     rows,
     skuCount: members.length,
+    imagen: galeria[0] || group.imagen,
     galeria
   };
 }

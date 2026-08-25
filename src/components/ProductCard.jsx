@@ -35,8 +35,11 @@ export function ProductCard({ ficha }) {
 
       {/* Galeria de fotos del producto (instalacion, detalle, empaque, etc.) -
           administrable desde Power Admin > Faretto > Galeria de producto.
-          Se completa hasta 6 casilleros con placeholders para que la grilla
-          no salte de tamaño mientras se van cargando fotos de a poco. */}
+          El primer casillero es la misma foto que ficha.imagen de arriba
+          (ver buildFichaFromGroup en lib/api.js) - no se salta, "queda por
+          defecto" ahi. Se completa hasta 6 casilleros con placeholders para
+          que la grilla no salte de tamaño mientras se van cargando fotos de
+          a poco. */}
       <div className="product-sheet-gallery">
         {Array.from({ length: 6 }).map((_, i) => {
           const url = (ficha.galeria || [])[i];
