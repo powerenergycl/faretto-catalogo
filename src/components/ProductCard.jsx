@@ -5,11 +5,19 @@ import { cleanSpecValue } from '../lib/api.js';
 // Ficha "por modelo" (ver catalogo impreso de Faretto): 1 foto + 1 titulo
 // generico representan a todos los SKU que son la misma pieza en distintas
 // potencias/temperaturas de color (agrupados en lib/api.js#buildProductGroups).
-// Orden: foto+titulo arriba, galeria de fotos, iconos de specs compartidos,
-// tabla de variantes suelta a todo el ancho al final.
+// Orden: titulo arriba, galeria de fotos (la #1 es la foto principal, ver
+// mas abajo), iconos de specs compartidos, tabla de variantes suelta a todo
+// el ancho al final.
 function isMaskedValue(valor = '') {
   return /^\*+$/.test(String(valor || '').trim());
 }
+
+// La foto grande de encabezado esta oculta a proposito (2026-08-25): la foto
+// #1 de la galeria ya se ve en el primer casillero de la grilla (ver mas
+// abajo), mostrarla tambien arriba duplicaba la misma imagen. No se borro el
+// bloque - solo hay que volver este flag a true si mas adelante se necesita
+// de nuevo el encabezado con foto.
+const SHOW_HEADER_PHOTO = false;
 
 export function ProductCard({ ficha }) {
   const sharedSpecs = (ficha.sharedSpecs || []).filter((spec) => !isMaskedValue(spec.valor));
@@ -22,12 +30,14 @@ export function ProductCard({ ficha }) {
 
   return (
     <article className="product-sheet">
-      <div className="product-sheet-header">
-        <div className="product-sheet-media">
-          {ficha.imagen ? (
-            <img src={ficha.imagen} alt={ficha.titulo} loading="lazy" width={200} height={200} />
-          ) : <ImageOff size={28} />}
-        </div>
+      <div className={`product-sheet-header ${SHOW_HEADER_PHOTO ? '' : 'product-sheet-header-no-media'}`}>
+        {SHOW_HEADER_PHOTO && (
+          <div className="product-sheet-media">
+            {ficha.imagen ? (
+              <img src={ficha.imagen} alt={ficha.titulo} loading="lazy" width={200} height={200} />
+            ) : <ImageOff size={28} />}
+          </div>
+        )}
         <div className="product-sheet-heading">
           <h2 className="product-sheet-name">{ficha.titulo}</h2>
         </div>
