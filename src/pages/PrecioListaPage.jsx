@@ -1,4 +1,4 @@
-import { Lightbulb, MapPin, Cable, LayoutGrid, Flashlight, Zap, Boxes, ImageOff } from 'lucide-react';
+import { Lightbulb, MapPin, Cable, LayoutGrid, Flashlight, Zap, Boxes, Video, Bell, ShieldAlert, Lamp, ImageOff } from 'lucide-react';
 import { FAMILIES, resolveFamily, formatPrice } from '../lib/api.js';
 
 // Mismos iconos que ya usa Header.jsx para el megamenu de familias - una
@@ -11,6 +11,10 @@ const FAMILY_ICONS = {
   'paneles-led': LayoutGrid,
   focos: Flashlight,
   tubos: Zap,
+  proyectores: Video,
+  'campanas-led': Bell,
+  'equipos-emergencia': ShieldAlert,
+  colgantes: Lamp,
   otros: Boxes
 };
 

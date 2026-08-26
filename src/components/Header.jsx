@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
-import { Search, MessageCircle, Menu, X, Lightbulb, MapPin, Cable, LayoutGrid, Flashlight, Zap, Boxes, ChevronDown, ChevronRight, ArrowRight } from 'lucide-react';
+import { Search, MessageCircle, Menu, X, Lightbulb, MapPin, Cable, LayoutGrid, Flashlight, Zap, Boxes, Video, Bell, ShieldAlert, Lamp, ChevronDown, ChevronRight, ArrowRight } from 'lucide-react';
 import { fetchFarettoMenu, FAMILIES, resolveFamily, resolveModelo } from '../lib/api.js';
 
 // Solo 2 rutas reales por ahora (Home y Catalogo, por eso el pedido
@@ -27,7 +27,13 @@ const FAMILY_ICONS = {
   'paneles-led': LayoutGrid,
   focos: Flashlight,
   tubos: Zap,
+  proyectores: Video,
+  'campanas-led': Bell,
+  'equipos-emergencia': ShieldAlert,
+  colgantes: Lamp,
   otros: Boxes
+  // El resto de las familias nuevas (ver FAMILY_RULES en lib/api.js) cae al
+  // fallback Boxes de abajo - no todas necesitan un icono propio distinto.
 };
 
 // menu_principal guarda "url" tal cual lo escribio el admin, sin garantia de
