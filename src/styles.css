@@ -38,36 +38,32 @@ a:focus-visible, button:focus-visible, input:focus-visible {
 /* ---- header ----
    Por defecto (tope de la pagina): fondo teal solido, logo blanco. Al hacer
    scroll (.is-scrolled, ver Header.jsx) pasa a fondo blanco con el logo a
-   color -- el mismo patron de header que "se define" al bajar. Buscador y
-   boton de WhatsApp quedan igual en los dos estados (son su propia "isla"
-   clara/blanca, funcionan bien sobre cualquiera de los dos fondos). */
+   color -- el mismo patron de header que "se define" al bajar. El menu
+   principal vive dentro de esta misma fila (ver Header.jsx) - antes era una
+   segunda fila blanca propia debajo del header; se subio aca adentro y se
+   saco el buscador que ocupaba este lugar (pedido del 26-08-2026), asi que
+   sus links necesitan los dos esquemas de color (claro sobre teal / gris
+   sobre blanco) igual que ya hace el logo de arriba. */
 .public-header { position: sticky; top: 0; z-index: 40; background: var(--teal); padding: 12px clamp(16px, 3vw, 40px); transition: background-color 240ms ease; }
 .public-header.is-scrolled { background: rgba(255,255,255,0.97); }
-.header-row { display: grid; grid-template-columns: auto 1fr auto; align-items: center; gap: 22px; }
+.header-row { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 22px; }
+.brand-logo { order: 1; flex: none; display: grid; align-items: center; height: 40px; }
 /* display:grid + grid-area:1/1 en ambas imagenes (no position:absolute): asi
    siguen contando como contenido "en flujo" para el sizing del contenedor
-   -- con absolute quedarian fuera del calculo y .brand-logo colapsaria a
-   ancho 0 (grid-template-columns: auto en .header-row no tendria de que
-   tomar la medida). */
-.brand-logo { display: grid; align-items: center; height: 40px; }
+   -- con absolute quedarian fuera del calculo. */
 .brand-logo img { grid-area: 1 / 1; height: 40px; width: auto; transition: opacity 220ms ease; }
 .brand-logo-color { opacity: 0; }
 .is-scrolled .brand-logo-white { opacity: 0; }
 .is-scrolled .brand-logo-color { opacity: 1; }
-.public-search { display: flex; align-items: center; gap: 10px; border: 1px solid var(--line-soft); background: #f7fafc; color: var(--gray); border-radius: 8px; padding: 12px 14px; }
-.public-search svg { flex: none; color: var(--gray); }
-.public-search span { color: #8a97a3; font-size: 14px; }
-.header-icons { display: flex; align-items: center; gap: 10px; }
+.header-icons { order: 3; flex: none; display: flex; align-items: center; gap: 10px; }
 .icon-btn { width: 40px; height: 40px; display: grid; place-items: center; border: 1px solid var(--line-soft); border-radius: 999px; background: #fff; color: var(--teal); }
 .nav-burger { display: none; }
 
-/* Menu principal: a proposito fuera de <header> (elemento hermano, no hijo)
-   -- queda con su propio fondo blanco fijo, independiente del estado
-   teal/blanco del header de arriba, y se desplaza con el resto del
-   contenido en vez de quedar pegado arriba con el header. */
-.public-nav { display: flex; justify-content: center; align-items: center; gap: clamp(14px, 2vw, 26px); min-height: 46px; flex-wrap: wrap; background: #fff; border-bottom: 1px solid var(--line); padding: 0 clamp(16px, 3vw, 40px); }
-.public-nav a { color: var(--gray); font-size: 12px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.02em; transition: color 160ms ease; }
-.public-nav a:hover, .public-nav a.active { color: var(--teal); }
+.public-nav { order: 2; flex: 1 1 auto; min-width: 0; display: flex; justify-content: center; align-items: center; gap: clamp(14px, 2vw, 26px); flex-wrap: wrap; }
+.public-nav a { color: rgba(255,255,255,0.85); font-size: 12px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.02em; transition: color 160ms ease; }
+.public-nav a:hover, .public-nav a.active { color: #fff; }
+.is-scrolled .public-nav a { color: var(--gray); }
+.is-scrolled .public-nav a:hover, .is-scrolled .public-nav a.active { color: var(--teal); }
 
 /* ---- megamenu de "Categorias" ----
    Dos paneles: lista de familias a la izquierda (hover/foco cambia cual se
@@ -78,8 +74,10 @@ a:focus-visible, button:focus-visible, input:focus-visible {
    scroll si hace falta, en vez de una grilla estatica con una columna
    gigante junto a columnas de 3-5 items. */
 .mega-menu-item { position: relative; }
-.mega-menu-trigger { display: inline-flex; align-items: center; gap: 5px; background: none; border: 0; padding: 0; margin: 0; font: inherit; color: var(--gray); font-size: 12px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.02em; cursor: pointer; transition: color 160ms ease; }
-.mega-menu-trigger:hover, .mega-menu-trigger.active { color: var(--teal); }
+.mega-menu-trigger { display: inline-flex; align-items: center; gap: 5px; background: none; border: 0; padding: 0; margin: 0; font: inherit; color: rgba(255,255,255,0.85); font-size: 12px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.02em; cursor: pointer; transition: color 160ms ease; }
+.mega-menu-trigger:hover, .mega-menu-trigger.active { color: #fff; }
+.is-scrolled .mega-menu-trigger { color: var(--gray); }
+.is-scrolled .mega-menu-trigger:hover, .is-scrolled .mega-menu-trigger.active { color: var(--teal); }
 .mega-menu-chevron { transition: transform 200ms ease; }
 .mega-menu-trigger.active .mega-menu-chevron { transform: rotate(180deg); }
 
@@ -116,21 +114,26 @@ a:focus-visible, button:focus-visible, input:focus-visible {
 .mega-menu-footer:hover { background: var(--tint); }
 
 @media (max-width: 760px) {
-  .header-row { grid-template-columns: auto auto; }
-  .public-search { display: none; }
+  /* Los iconos quedan junto al logo en la fila 1 (mismo orden que antes);
+     el menu pasa a orden 3 + flex-basis:100% para que, al abrirse, caiga
+     en su propia fila debajo en vez de apretarse entre logo e iconos. */
+  .header-icons { order: 2; }
   .nav-burger { display: grid; }
   /* Colapsado por defecto; .is-open (Header.jsx, toggle del burger) lo abre
      como panel apilado en vez de fila horizontal -- mas facil de tocar en
      mobile que una fila que hace wrap. */
   .public-nav { display: none; }
-  .public-nav.is-open { display: flex; flex-direction: column; align-items: stretch; gap: 2px; padding: 10px clamp(16px, 3vw, 40px) 14px; }
-  .public-nav.is-open a { padding: 10px 4px; border-bottom: 1px solid var(--line-soft); }
+  .public-nav.is-open { order: 3; flex: 1 1 100%; display: flex; flex-direction: column; align-items: stretch; gap: 2px; padding: 14px 0 4px; border-top: 1px solid rgba(255,255,255,0.2); margin-top: 8px; }
+  .is-scrolled .public-nav.is-open { border-top-color: var(--line); }
+  .public-nav.is-open a { padding: 10px 4px; border-bottom: 1px solid rgba(255,255,255,0.15); }
+  .is-scrolled .public-nav.is-open a { border-bottom-color: var(--line-soft); }
   .public-nav.is-open a:last-child { border-bottom: 0; }
 
   /* El megamenu dentro del panel mobile ya apilado: nada de dropdown
      flotante ni flechita -- el panel queda "en linea", empujando el resto
      de la lista hacia abajo, familias y modelos apilados en una columna. */
-  .mega-menu-item { border-bottom: 1px solid var(--line-soft); }
+  .mega-menu-item { border-bottom: 1px solid rgba(255,255,255,0.15); }
+  .is-scrolled .mega-menu-item { border-bottom-color: var(--line-soft); }
   .mega-menu-trigger { width: 100%; padding: 10px 4px; justify-content: space-between; }
   .mega-menu-panel { position: static; transform: none; width: auto; max-width: none; opacity: 1; pointer-events: auto; box-shadow: none; border: 0; border-radius: 0; grid-template-columns: 1fr; display: none; }
   .mega-menu-panel::before { display: none; }

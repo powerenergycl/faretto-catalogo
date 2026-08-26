@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
-import { Search, MessageCircle, Menu, X, Lightbulb, MapPin, Cable, LayoutGrid, Flashlight, Zap, Boxes, Video, Bell, ShieldAlert, Lamp, ChevronDown, ChevronRight, ArrowRight } from 'lucide-react';
+import { MessageCircle, Menu, X, Lightbulb, MapPin, Cable, LayoutGrid, Flashlight, Zap, Boxes, Video, Bell, ShieldAlert, Lamp, ChevronDown, ChevronRight, ArrowRight } from 'lucide-react';
 import { fetchFarettoMenu, FAMILIES, resolveFamily, resolveModelo } from '../lib/api.js';
 
 // Solo 2 rutas reales por ahora (Home y Catalogo, por eso el pedido
@@ -141,129 +141,126 @@ export function Header({ route, onNavigate, productos = [] }) {
   };
 
   return (
-    <>
-      <header className={`public-header ${isScrolled ? 'is-scrolled' : ''}`}>
-        <div className="header-row">
-          <a className="brand-logo" href="/" onClick={(event) => { event.preventDefault(); onNavigate('/'); }}>
-            <img className="brand-logo-white" src="/assets/logo-faretto-white.webp" alt="Faretto — Illuminazione e Design" />
-            <img className="brand-logo-color" src="/assets/logo-faretto.webp" alt="" aria-hidden="true" />
-          </a>
-          <div className="public-search">
-            <Search size={18} />
-            <span>Buscar por modelo, SKU o familia</span>
-          </div>
-          <div className="header-icons">
-            {/* Sin cuenta ni carrito propios: este sitio es catalogo, no
-                ecommerce. El unico "CTA de conversion" es cotizar por WhatsApp. */}
-            <a className="icon-btn" href="https://wa.me/" target="_blank" rel="noreferrer" aria-label="Cotizar por WhatsApp">
-              <MessageCircle size={18} />
-            </a>
-            <button
-              type="button"
-              className="icon-btn nav-burger"
-              aria-label={mobileNavOpen ? 'Cerrar menú' : 'Abrir menú'}
-              aria-expanded={mobileNavOpen}
-              onClick={() => setMobileNavOpen((current) => !current)}
-            >
-              {mobileNavOpen ? <X size={18} /> : <Menu size={18} />}
-            </button>
-          </div>
-        </div>
-      </header>
-      <nav className={`public-nav ${mobileNavOpen ? 'is-open' : ''}`}>
-        {navLinks.map((link) => {
-          if (link.href === '/categorias' && families.length > 0) {
-            return (
-              <div className="mega-menu-item" key={link.href} ref={megaMenuRef}>
-                <button
-                  type="button"
-                  className={`mega-menu-trigger ${megaMenuOpen ? 'active' : ''}`}
-                  aria-expanded={megaMenuOpen}
-                  onClick={() => setMegaMenuOpen((current) => !current)}
-                >
-                  {link.label}
-                  <ChevronDown size={13} className="mega-menu-chevron" />
-                </button>
-                <div className={`mega-menu-panel ${megaMenuOpen ? 'is-open' : ''}`}>
-                  <div className="mega-menu-families">
-                    {families.map((family) => {
-                      const Icon = FAMILY_ICONS[family.id] || Boxes;
-                      const isActive = family.id === activeFamilyId;
-                      return (
-                        <button
-                          type="button"
-                          key={family.id}
-                          className={`mega-menu-family ${isActive ? 'active' : ''}`}
-                          // Antes esto navegaba directo si la familia ya estaba
-                          // activa (pensado como "hover previsualiza, click de
-                          // nuevo confirma") -- se saco: tanto Playwright como
-                          // mobile real (Safari/Chrome emulan un mouseenter
-                          // antes del primer tap) disparaban el onMouseEnter
-                          // de aca abajo justo antes del click, asi que
-                          // isActive ya daba true en el click y navegaba de
-                          // una, sin darle chance al usuario de ver los
-                          // modelos. Ahora el click SIEMPRE solo selecciona/
-                          // previsualiza -- "Ver todo" (mega-menu-detail-head)
-                          // es el unico camino para navegar a la familia
-                          // completa, sin ambiguedad para mouse ni para touch.
-                          onMouseEnter={() => setActiveFamilyId(family.id)}
-                          onFocus={() => setActiveFamilyId(family.id)}
-                          onClick={() => setActiveFamilyId(family.id)}
-                        >
-                          <Icon size={17} />
-                          <span>{family.label}</span>
-                          <ChevronRight size={15} className="mega-menu-family-chevron" />
-                        </button>
-                      );
-                    })}
-                  </div>
-                  {activeFamily && (
-                    <div className="mega-menu-detail">
-                      <div className="mega-menu-detail-head">
-                        <span>{activeFamily.label}</span>
-                        <button type="button" className="mega-menu-viewall" onClick={() => goToFamily(activeFamily.id)}>
-                          Ver todo <ArrowRight size={13} />
-                        </button>
-                      </div>
-                      {activeFamily.modelos.length > 0 ? (
-                        <div className="mega-menu-modelos">
-                          {activeFamily.modelos.map((modelo) => (
-                            <button type="button" key={modelo} onClick={() => goToModelo(activeFamily.id, modelo)}>
-                              {modelo}
-                            </button>
-                          ))}
-                        </div>
-                      ) : (
-                        <p className="mega-menu-empty">Sin modelos individuales — revisa todo el catálogo de esta familia.</p>
-                      )}
-                    </div>
-                  )}
-                  <a
-                    className="mega-menu-footer"
-                    href="/catalogo"
-                    onClick={(event) => { event.preventDefault(); setMegaMenuOpen(false); onNavigate('/catalogo'); }}
+    <header className={`public-header ${isScrolled ? 'is-scrolled' : ''}`}>
+      <div className="header-row">
+        <a className="brand-logo" href="/" onClick={(event) => { event.preventDefault(); onNavigate('/'); }}>
+          <img className="brand-logo-white" src="/assets/logo-faretto-white.webp" alt="Faretto — Illuminazione e Design" />
+          <img className="brand-logo-color" src="/assets/logo-faretto.webp" alt="" aria-hidden="true" />
+        </a>
+        {/* Antes vivia como fila propia (blanca) debajo del header - subido
+            aca adentro para liberar esa segunda fila; el buscador que
+            ocupaba este lugar se saco (ver mismo pedido). */}
+        <nav className={`public-nav ${mobileNavOpen ? 'is-open' : ''}`}>
+          {navLinks.map((link) => {
+            if (link.href === '/categorias' && families.length > 0) {
+              return (
+                <div className="mega-menu-item" key={link.href} ref={megaMenuRef}>
+                  <button
+                    type="button"
+                    className={`mega-menu-trigger ${megaMenuOpen ? 'active' : ''}`}
+                    aria-expanded={megaMenuOpen}
+                    onClick={() => setMegaMenuOpen((current) => !current)}
                   >
-                    Ver catálogo completo <ArrowRight size={14} />
-                  </a>
+                    {link.label}
+                    <ChevronDown size={13} className="mega-menu-chevron" />
+                  </button>
+                  <div className={`mega-menu-panel ${megaMenuOpen ? 'is-open' : ''}`}>
+                    <div className="mega-menu-families">
+                      {families.map((family) => {
+                        const Icon = FAMILY_ICONS[family.id] || Boxes;
+                        const isActive = family.id === activeFamilyId;
+                        return (
+                          <button
+                            type="button"
+                            key={family.id}
+                            className={`mega-menu-family ${isActive ? 'active' : ''}`}
+                            // Antes esto navegaba directo si la familia ya estaba
+                            // activa (pensado como "hover previsualiza, click de
+                            // nuevo confirma") -- se saco: tanto Playwright como
+                            // mobile real (Safari/Chrome emulan un mouseenter
+                            // antes del primer tap) disparaban el onMouseEnter
+                            // de aca abajo justo antes del click, asi que
+                            // isActive ya daba true en el click y navegaba de
+                            // una, sin darle chance al usuario de ver los
+                            // modelos. Ahora el click SIEMPRE solo selecciona/
+                            // previsualiza -- "Ver todo" (mega-menu-detail-head)
+                            // es el unico camino para navegar a la familia
+                            // completa, sin ambiguedad para mouse ni para touch.
+                            onMouseEnter={() => setActiveFamilyId(family.id)}
+                            onFocus={() => setActiveFamilyId(family.id)}
+                            onClick={() => setActiveFamilyId(family.id)}
+                          >
+                            <Icon size={17} />
+                            <span>{family.label}</span>
+                            <ChevronRight size={15} className="mega-menu-family-chevron" />
+                          </button>
+                        );
+                      })}
+                    </div>
+                    {activeFamily && (
+                      <div className="mega-menu-detail">
+                        <div className="mega-menu-detail-head">
+                          <span>{activeFamily.label}</span>
+                          <button type="button" className="mega-menu-viewall" onClick={() => goToFamily(activeFamily.id)}>
+                            Ver todo <ArrowRight size={13} />
+                          </button>
+                        </div>
+                        {activeFamily.modelos.length > 0 ? (
+                          <div className="mega-menu-modelos">
+                            {activeFamily.modelos.map((modelo) => (
+                              <button type="button" key={modelo} onClick={() => goToModelo(activeFamily.id, modelo)}>
+                                {modelo}
+                              </button>
+                            ))}
+                          </div>
+                        ) : (
+                          <p className="mega-menu-empty">Sin modelos individuales — revisa todo el catálogo de esta familia.</p>
+                        )}
+                      </div>
+                    )}
+                    <a
+                      className="mega-menu-footer"
+                      href="/catalogo"
+                      onClick={(event) => { event.preventDefault(); setMegaMenuOpen(false); onNavigate('/catalogo'); }}
+                    >
+                      Ver catálogo completo <ArrowRight size={14} />
+                    </a>
+                  </div>
                 </div>
-              </div>
-            );
-          }
+              );
+            }
 
-          return (
-            <a
-              key={link.href}
-              href={link.href}
-              target={link.external ? '_blank' : undefined}
-              rel={link.external ? 'noreferrer' : undefined}
-              className={!link.external && (`${route.pathname}${route.search}` === link.href || (route.pathname === link.href && !route.search)) ? 'active' : ''}
-              onClick={link.external ? undefined : (event) => { event.preventDefault(); onNavigate(link.href); }}
-            >
-              {link.label}
-            </a>
-          );
-        })}
-      </nav>
-    </>
+            return (
+              <a
+                key={link.href}
+                href={link.href}
+                target={link.external ? '_blank' : undefined}
+                rel={link.external ? 'noreferrer' : undefined}
+                className={!link.external && (`${route.pathname}${route.search}` === link.href || (route.pathname === link.href && !route.search)) ? 'active' : ''}
+                onClick={link.external ? undefined : (event) => { event.preventDefault(); onNavigate(link.href); }}
+              >
+                {link.label}
+              </a>
+            );
+          })}
+        </nav>
+        <div className="header-icons">
+          {/* Sin cuenta ni carrito propios: este sitio es catalogo, no
+              ecommerce. El unico "CTA de conversion" es cotizar por WhatsApp. */}
+          <a className="icon-btn" href="https://wa.me/" target="_blank" rel="noreferrer" aria-label="Cotizar por WhatsApp">
+            <MessageCircle size={18} />
+          </a>
+          <button
+            type="button"
+            className="icon-btn nav-burger"
+            aria-label={mobileNavOpen ? 'Cerrar menú' : 'Abrir menú'}
+            aria-expanded={mobileNavOpen}
+            onClick={() => setMobileNavOpen((current) => !current)}
+          >
+            {mobileNavOpen ? <X size={18} /> : <Menu size={18} />}
+          </button>
+        </div>
+      </div>
+    </header>
   );
 }
