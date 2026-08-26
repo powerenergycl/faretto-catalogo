@@ -47,15 +47,8 @@ function normalizeMenuItem({ etiqueta, url, tipo }) {
   return { label: etiqueta, href, external };
 }
 
-// Umbral de scroll para pasar de header teal (logo blanco) a header blanco
-// (logo a color): >0 a proposito, no 0 - un scroll de 1-2px por rebote de
-// trackpad/mouse-wheel en el tope de la pagina no debe alternar la clase
-// ida y vuelta.
-const SCROLL_SOLID_THRESHOLD = 24;
-
 export function Header({ route, onNavigate, productos = [] }) {
   const [menuItems, setMenuItems] = useState(null); // null = todavia no respondio
-  const [isScrolled, setIsScrolled] = useState(false);
   const [mobileNavOpen, setMobileNavOpen] = useState(false);
   const [megaMenuOpen, setMegaMenuOpen] = useState(false);
   const [activeFamilyId, setActiveFamilyId] = useState('');
@@ -67,13 +60,6 @@ export function Header({ route, onNavigate, productos = [] }) {
       .then((items) => { if (!cancelled) setMenuItems(items.map(normalizeMenuItem)); })
       .catch(() => { if (!cancelled) setMenuItems([]); });
     return () => { cancelled = true; };
-  }, []);
-
-  useEffect(() => {
-    const onScroll = () => setIsScrolled(window.scrollY > SCROLL_SOLID_THRESHOLD);
-    onScroll(); // por si la pagina carga ya scrolleada (ej. al volver con "atras")
-    window.addEventListener('scroll', onScroll, { passive: true });
-    return () => window.removeEventListener('scroll', onScroll);
   }, []);
 
   // Se cierra solo al cambiar de ruta (no basta con cerrarlo en el onClick
@@ -141,11 +127,10 @@ export function Header({ route, onNavigate, productos = [] }) {
   };
 
   return (
-    <header className={`public-header ${isScrolled ? 'is-scrolled' : ''}`}>
+    <header className="public-header">
       <div className="header-row">
         <a className="brand-logo" href="/" onClick={(event) => { event.preventDefault(); onNavigate('/'); }}>
-          <img className="brand-logo-white" src="/assets/logo-faretto-white.webp" alt="Faretto — Illuminazione e Design" />
-          <img className="brand-logo-color" src="/assets/logo-faretto.webp" alt="" aria-hidden="true" />
+          <img src="/assets/logo-faretto.webp" alt="Faretto — Illuminazione e Design" />
         </a>
         {/* Antes vivia como fila propia (blanca) debajo del header - subido
             aca adentro para liberar esa segunda fila; el buscador que
