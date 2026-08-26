@@ -43,11 +43,6 @@ export function PrecioListaPage({ productos }) {
       <div className="breadcrumb">Inicio <b>/</b> Lista de precios</div>
       <h1 className="cat-title">Lista de precios</h1>
 
-      <div className="intro-box">
-        <div><strong>Precio de lista Faretto</strong> — todos los productos publicados en el catálogo, agrupados por familia.</div>
-        <div>Valores en pesos chilenos, más IVA. Sujetos a cambio sin previo aviso — para una cotización formal escríbenos por WhatsApp.</div>
-      </div>
-
       {grupos.length === 0 ? (
         <div className="state-box">No hay productos publicados por el momento.</div>
       ) : (

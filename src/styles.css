@@ -463,9 +463,6 @@ a:focus-visible, button:focus-visible, input:focus-visible {
    nombre+precio de lista agrupados por familia. Mismo lenguaje visual que la
    ficha de producto (product-sheet-table de arriba: header teal, filas
    alternadas), pero por SKU puntual, no por "producto principal" agrupado. */
-.intro-box { margin: 0 0 22px; padding: 14px 16px; border-radius: 8px; background: #fff; border: 1px solid #d7dce2; color: var(--gray); font-size: 13px; line-height: 1.6; box-shadow: 0 14px 32px rgba(0,101,120,0.06); display: grid; gap: 6px; }
-.intro-box strong { color: var(--ink); }
-
 .jump-nav { display: flex; flex-wrap: wrap; gap: 8px; margin: 0 0 28px; }
 .jump-pill { display: inline-flex; align-items: center; gap: 6px; border: 1px solid var(--line-soft); background: #fff; color: var(--ink); font: inherit; font-size: 12px; font-weight: 800; padding: 8px 14px; border-radius: 999px; cursor: pointer; transition: border-color 140ms ease, color 140ms ease, background 140ms ease; }
 .jump-pill svg { color: var(--teal); flex: none; }
