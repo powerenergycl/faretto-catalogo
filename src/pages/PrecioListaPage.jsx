@@ -33,7 +33,7 @@ export function PrecioListaPage({ productos }) {
 
       <div className="intro-box">
         <div><strong>Precio de lista Faretto</strong> — todos los productos publicados en el catálogo, agrupados por familia.</div>
-        <div>Valores en pesos chilenos. Sujetos a cambio sin previo aviso — para una cotización formal escríbenos por WhatsApp.</div>
+        <div>Valores en pesos chilenos, más IVA. Sujetos a cambio sin previo aviso — para una cotización formal escríbenos por WhatsApp.</div>
       </div>
 
       {grupos.length === 0 ? (
