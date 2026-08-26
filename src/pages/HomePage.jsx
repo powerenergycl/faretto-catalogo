@@ -10,6 +10,11 @@ import { formatBlogDate } from './BlogPage.jsx';
 // trabajo cuando se reactiven.
 const SHOW_ACCESOS_DIRECTOS = false;
 
+// Accesos destacados (grilla 3x3 de arriba del todo) - pedido explicito del
+// 26-08-2026: sacarla del home. Mismo patron que SHOW_ACCESOS_DIRECTOS de
+// arriba (flag, no se borra el codigo) por si se reactiva mas adelante.
+const SHOW_ACCESOS_DESTACADOS = false;
+
 // Accesos destacados (grilla 3x3): ahora administrables desde sitio_power
 // (Power Admin > sitio Faretto > Accesos destacados). Esta lista fija es
 // solo el respaldo mientras no haya ninguno cargado ahi, o si el fetch
@@ -341,9 +346,11 @@ export function HomePage({ productos, dataStatus = 'ready', onNavigate }) {
 
   useEffect(() => {
     let cancelled = false;
-    fetchFarettoAccesos()
-      .then((items) => { if (!cancelled) setAccesos(items); })
-      .catch(() => { if (!cancelled) setAccesos([]); });
+    if (SHOW_ACCESOS_DESTACADOS) {
+      fetchFarettoAccesos()
+        .then((items) => { if (!cancelled) setAccesos(items); })
+        .catch(() => { if (!cancelled) setAccesos([]); });
+    }
     fetchFarettoHomeLayout()
       .then((orden) => { if (!cancelled) setSectionOrder(orden); })
       .catch(() => {}); // ya arranca con el default, no hace falta setear nada
@@ -354,15 +361,18 @@ export function HomePage({ productos, dataStatus = 'ready', onNavigate }) {
 
   return (
     <>
-      {/* ---- accesos destacados ---- */}
-      <div className="home-section-heading">
-        <h2>Accesos destacados</h2>
-      </div>
-      <div className="home-quicklinks">
-        {quicklinks.map((link) => (
-          <QuickLink key={link.nombre} {...link} onNavigate={onNavigate} />
-        ))}
-      </div>
+      {SHOW_ACCESOS_DESTACADOS && (
+        <>
+          <div className="home-section-heading">
+            <h2>Accesos destacados</h2>
+          </div>
+          <div className="home-quicklinks">
+            {quicklinks.map((link) => (
+              <QuickLink key={link.nombre} {...link} onNavigate={onNavigate} />
+            ))}
+          </div>
+        </>
+      )}
 
       {SHOW_ACCESOS_DIRECTOS && (
         <FamilyStrip productos={productos} dataStatus={dataStatus} onNavigate={onNavigate} />

@@ -70,7 +70,11 @@ a:focus-visible, button:focus-visible, input:focus-visible {
 .mega-menu-chevron { transition: transform 200ms ease; }
 .mega-menu-trigger.active .mega-menu-chevron { transform: rotate(180deg); }
 
-.mega-menu-panel { position: absolute; top: calc(100% + 14px); left: 50%; transform: translateX(-50%) translateY(-6px); width: min(620px, 86vw); background: #fff; border: 1px solid var(--line); border-radius: 12px; box-shadow: 0 24px 56px rgba(0,101,120,0.16); display: grid; grid-template-columns: 200px 1fr; overflow: hidden; opacity: 0; pointer-events: none; transition: opacity 200ms ease, transform 200ms ease; z-index: 50; }
+/* grid-template-columns: 260px (no 200px) - con las familias nuevas
+   (Ampolletas y Bases, Antiexplosivos y Estancos, Accesorios y Componentes,
+   Riel y Track Light) 200px partia el nombre en 2 lineas. Ancho total del
+   panel subido en la misma proporcion para no angostar la columna derecha. */
+.mega-menu-panel { position: absolute; top: calc(100% + 14px); left: 50%; transform: translateX(-50%) translateY(-6px); width: min(680px, 90vw); background: #fff; border: 1px solid var(--line); border-radius: 12px; box-shadow: 0 24px 56px rgba(0,101,120,0.16); display: grid; grid-template-columns: 260px 1fr; overflow: hidden; opacity: 0; pointer-events: none; transition: opacity 200ms ease, transform 200ms ease; z-index: 50; }
 .mega-menu-panel.is-open { opacity: 1; pointer-events: auto; transform: translateX(-50%) translateY(0); }
 .mega-menu-panel::before { content: ''; position: absolute; top: -6px; left: 50%; transform: translateX(-50%) rotate(45deg); width: 12px; height: 12px; background: #fff; border-left: 1px solid var(--line); border-top: 1px solid var(--line); }
 
