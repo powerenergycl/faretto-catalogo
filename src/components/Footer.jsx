@@ -14,12 +14,11 @@ export function Footer() {
           <a href="/catalogo?familia=cintas-led">Cintas LED</a>
           <a href="/catalogo?familia=paneles-led">Paneles LED</a>
           <a href="/catalogo?familia=focos">Focos</a>
-          <a href="/blog">Blog</a>
         </div>
         <div>
-          <h4>Power Energy</h4>
-          <a href="https://powerenergy.cl" target="_blank" rel="noreferrer">Sitio principal</a>
-          <a href="https://powerenergy.cl/pagina/empresa" target="_blank" rel="noreferrer">Empresa</a>
+          <h4>La empresa</h4>
+          <a href="/blog">Blog</a>
+          <a href="/quienes-somos">Quienes somos</a>
         </div>
         <div>
           <h4>Ayuda</h4>
