@@ -211,6 +211,14 @@ export function resolveFamily(nombre = '') {
   return match || { id: 'otros', label: 'Otros' };
 }
 
+// Lumex no es una familia (no describe un tipo de producto) - es una linea
+// que cruza varias familias reales (Campanas LED, Paneles LED, Antiexplosivos
+// y Estancos, ~11 SKU en total). Se filtra aparte via /catalogo?marca=lumex
+// en vez de sumarse a FAMILY_RULES (ver CategoryPage.jsx).
+export function isLumex(nombre = '') {
+  return /lumex/i.test(nombre);
+}
+
 // "Otros" al final: cubre lo que de verdad no tiene una familia clara
 // (tortugas, calugas, iluminacion solar puntual, postes, etc. - un residual
 // chico y genuinamente variado, no ya ~200 SKU por falta de reglas).

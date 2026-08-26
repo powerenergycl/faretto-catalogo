@@ -1,6 +1,6 @@
 import { useMemo, useState } from 'react';
 import { ProductCard } from '../components/ProductCard.jsx';
-import { FAMILIES, resolveFamily, resolveModelo, buildProductGroups } from '../lib/api.js';
+import { FAMILIES, resolveFamily, resolveModelo, buildProductGroups, isLumex } from '../lib/api.js';
 
 const PAGE_SIZE = 24;
 
@@ -8,26 +8,33 @@ export function CategoryPage({ productos, galeriaGrupos, route, onNavigate }) {
   const params = new URLSearchParams(route.search);
   const activeFamily = params.get('familia') || '';
   const activeModelo = params.get('modelo') || '';
+  // Lumex cruza varias familias reales (no es una familia propia, ver
+  // isLumex en lib/api.js) - "marca" gana por sobre "familia"/"modelo" si
+  // ambos vinieran en la URL, junta las ~11 fichas en una sola vista sin
+  // sidebar de familia (no hay una familia unica que mostrar ahi).
+  const activeMarca = params.get('marca') || '';
+  const isLumexView = activeMarca === 'lumex';
   const [visibleCount, setVisibleCount] = useState(PAGE_SIZE);
 
   const byFamily = useMemo(() => {
+    if (isLumexView) return productos.filter((product) => isLumex(product.nombre));
     if (!activeFamily) return productos;
     return productos.filter((product) => resolveFamily(product.nombre).id === activeFamily);
-  }, [productos, activeFamily]);
+  }, [productos, activeFamily, isLumexView]);
 
   // El sidebar muestra unicamente la familia activa (nav de familia a
   // familia ya vive en el header) - solo hace falta el desglose de modelos
   // de esa familia puntual. No todas las familias traen "Modelo X" en el
   // nombre (ej. cintas LED nunca), asi que a veces queda vacio.
   const modelosDeLaFamilia = useMemo(() => {
-    if (!activeFamily) return [];
+    if (!activeFamily || isLumexView) return [];
     const modelos = new Set();
     for (const product of byFamily) {
       const modelo = resolveModelo(product.nombre);
       if (modelo) modelos.add(modelo);
     }
     return [...modelos].sort((a, b) => a.localeCompare(b));
-  }, [byFamily, activeFamily]);
+  }, [byFamily, activeFamily, isLumexView]);
 
   const filtered = useMemo(() => {
     if (!activeModelo) return byFamily;
@@ -57,12 +64,22 @@ export function CategoryPage({ productos, galeriaGrupos, route, onNavigate }) {
   return (
     <>
       <div className="breadcrumb">
-        Inicio <b>/</b> {activeModelo ? <>{activeFamilyLabel} <b>/</b> Modelo {activeModelo}</> : (activeFamilyLabel || 'Catálogo Faretto')}
+        Inicio <b>/</b> {isLumexView ? 'Lumex' : (activeModelo ? <>{activeFamilyLabel} <b>/</b> Modelo {activeModelo}</> : (activeFamilyLabel || 'Catálogo Faretto'))}
       </div>
-      <h1 className="cat-title">{activeFamilyLabel || 'Catálogo Faretto'}</h1>
 
-      <div className={`cat-body ${activeFamily ? '' : 'cat-body-full'}`}>
-        {activeFamily && (
+      {isLumexView ? (
+        <div className="lumex-hero">
+          <h1 className="lumex-hero-title">
+            <img src="/assets/logo-lumex.webp" alt="Lumex — Iluminación y diseño" />
+          </h1>
+          <p>Línea Lumex dentro del catálogo Faretto: campanas industriales, paneles LED y equipos estancos.</p>
+        </div>
+      ) : (
+        <h1 className="cat-title">{activeFamilyLabel || 'Catálogo Faretto'}</h1>
+      )}
+
+      <div className={`cat-body ${activeFamily && !isLumexView ? '' : 'cat-body-full'}`}>
+        {activeFamily && !isLumexView && (
           <aside className="filter-sidebar">
             <div className="filter-tree">
               <button className={!activeModelo ? 'active' : ''} onClick={() => selectFamily(activeFamily)}>
@@ -96,7 +113,7 @@ export function CategoryPage({ productos, galeriaGrupos, route, onNavigate }) {
             <div className="state-box">No hay productos en esta familia todavía.</div>
           ) : (
             <div className="product-sheet-list">
-              {visible.map((ficha) => <ProductCard key={ficha.key} ficha={ficha} />)}
+              {visible.map((ficha) => <ProductCard key={ficha.key} ficha={ficha} showLumexBadge={isLumexView} />)}
             </div>
           )}
 

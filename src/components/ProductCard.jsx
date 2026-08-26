@@ -19,7 +19,7 @@ function isMaskedValue(valor = '') {
 // de nuevo el encabezado con foto.
 const SHOW_HEADER_PHOTO = false;
 
-export function ProductCard({ ficha }) {
+export function ProductCard({ ficha, showLumexBadge = false }) {
   const sharedSpecs = (ficha.sharedSpecs || []).filter((spec) => !isMaskedValue(spec.valor));
   const columns = ficha.columns || [];
   const rows = ficha.rows || [];
@@ -30,6 +30,12 @@ export function ProductCard({ ficha }) {
 
   return (
     <article className="product-sheet">
+      {/* Distintivo de linea Lumex (ver /catalogo?marca=lumex en
+          CategoryPage.jsx) - el circulo-X recortado del logo real, no el
+          wordmark completo (ilegible a este tamaño). */}
+      {showLumexBadge && (
+        <img className="product-sheet-lumex-badge" src="/assets/logo-lumex-icon.webp" alt="Línea Lumex" title="Línea Lumex" />
+      )}
       <div className={`product-sheet-header ${SHOW_HEADER_PHOTO ? '' : 'product-sheet-header-no-media'}`}>
         {SHOW_HEADER_PHOTO && (
           <div className="product-sheet-media">

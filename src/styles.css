@@ -11,6 +11,11 @@
   --line: #e2e6ef;
   --line-soft: #d9e3ea;
   --page-bg: #ededed;
+  /* Colores reales del logo Lumex (muestreados del png) - distintos del
+     teal/gris de Faretto a proposito, para que la linea Lumex se note
+     como una distincion, no como un color mas del sistema. */
+  --lumex-teal: #16696e;
+  --lumex-red: #e6150a;
 }
 
 * { box-sizing: border-box; }
@@ -351,6 +356,16 @@ a:focus-visible, button:focus-visible, input:focus-visible {
 .cat-description { margin: 0 0 22px; padding: 14px 16px; border-radius: 8px; background: #fff; border: 1px solid #d7dce2; color: var(--gray); font-size: 13px; line-height: 1.6; box-shadow: 0 14px 32px rgba(0,101,120,0.06); }
 .cat-description-modelo { text-align: center; font-size: 16px; font-weight: 800; color: #fff; text-transform: uppercase; letter-spacing: 0.02em; background: var(--teal); border-color: var(--teal); }
 
+/* ---- /catalogo?marca=lumex ----
+   El logo real reemplaza al <h1> de texto (mismo lugar/rol que .cat-title,
+   solo que la marca ya trae su propio wordmark) - franja blanca con el
+   filete rojo de la firma del logo repetido debajo, para que la pagina
+   "herede" la identidad Lumex en vez de solo pegarle el logo encima. */
+.lumex-hero { background: #fff; border: 1px solid #d7dce2; border-radius: 8px; box-shadow: 0 14px 32px rgba(0,101,120,0.06); padding: 28px clamp(20px, 4vw, 40px) 22px; margin-bottom: 22px; text-align: center; border-top: 4px solid var(--lumex-red); }
+.lumex-hero-title { margin: 0 0 10px; }
+.lumex-hero-title img { height: clamp(46px, 6vw, 64px); width: auto; margin: 0 auto; }
+.lumex-hero p { margin: 0; color: var(--gray); font-size: 13.5px; line-height: 1.6; max-width: 620px; margin-inline: auto; }
+
 /* ---- distribuidores ---- */
 .distributor-zone + .distributor-zone { margin-top: 8px; }
 .distributor-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 14px; }
@@ -384,6 +399,11 @@ a:focus-visible, button:focus-visible, input:focus-visible {
    divisorias adentro. */
 .product-sheet-list { display: grid; gap: 22px; }
 .product-sheet { position: relative; background: #fff; border: 1px solid #d7dce2; border-radius: 8px; box-shadow: 0 14px 32px rgba(0,101,120,0.06); padding: 24px 20px; display: grid; gap: 18px; }
+
+/* Sello de linea Lumex (ver /catalogo?marca=lumex) - circulo-X del logo
+   real, "prendido" en la esquina como un sello, con su propia sombra para
+   que no se lea como parte plana de la ficha. */
+.product-sheet-lumex-badge { position: absolute; top: -14px; right: 18px; width: 46px; height: 46px; filter: drop-shadow(0 6px 10px rgba(22,105,110,0.35)); }
 
 /* Circulo con el color de luz (solo si todo el grupo de SKU comparte el
    mismo color - si varia entre filas no hay un solo color que mostrar). */
