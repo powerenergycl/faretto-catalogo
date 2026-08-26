@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import { Lightbulb, MapPin, Cable, LayoutGrid, Flashlight, Zap, Boxes, Video, Bell, ShieldAlert, Lamp, ImageOff } from 'lucide-react';
 import { FAMILIES, resolveFamily, formatPrice } from '../lib/api.js';
 
@@ -30,6 +31,13 @@ export function PrecioListaPage({ productos }) {
     }))
     .filter((grupo) => grupo.items.length > 0);
 
+  // Pestañas en vez de una sola lista larga: con ~335 SKU en 16 familias,
+  // desplegarlas todas de una vez hacia una pagina interminable de scroll.
+  // Solo se pinta la familia activa; el resto vive en memoria (sin refetch
+  // al cambiar de pestaña). Arranca en la primera familia con productos.
+  const [activeFamilyId, setActiveFamilyId] = useState(() => grupos[0]?.familia.id ?? null);
+  const activeGrupo = grupos.find(({ familia }) => familia.id === activeFamilyId) || grupos[0];
+
   return (
     <>
       <div className="breadcrumb">Inicio <b>/</b> Lista de precios</div>
@@ -44,53 +52,58 @@ export function PrecioListaPage({ productos }) {
         <div className="state-box">No hay productos publicados por el momento.</div>
       ) : (
         <>
-          <div className="jump-nav">
+          <div className="jump-nav" role="tablist">
             {grupos.map(({ familia, items }) => {
               const Icon = FAMILY_ICONS[familia.id] || Boxes;
+              const isActive = familia.id === activeGrupo.familia.id;
               return (
-                <a key={familia.id} className="jump-pill" href={`#familia-${familia.id}`}>
+                <button
+                  type="button"
+                  role="tab"
+                  aria-selected={isActive}
+                  key={familia.id}
+                  className={`jump-pill ${isActive ? 'is-active' : ''}`}
+                  onClick={() => setActiveFamilyId(familia.id)}
+                >
                   <Icon size={14} />
                   {familia.label}
                   <span>{items.length}</span>
-                </a>
+                </button>
               );
             })}
           </div>
 
-          {grupos.map(({ familia, items }) => {
-            const Icon = FAMILY_ICONS[familia.id] || Boxes;
-            return (
-              <section className="price-family" id={`familia-${familia.id}`} key={familia.id}>
-                <div className="price-family-head">
-                  <span className="price-family-icon"><Icon size={18} /></span>
-                  <h2>{familia.label}</h2>
-                  <span>{items.length} producto{items.length === 1 ? '' : 's'}</span>
-                </div>
-                <div className="price-table">
-                  <div className="price-table-head">
-                    <span>Foto</span>
-                    <span>SKU</span>
-                    <span>Producto</span>
-                    <span>Precio normal</span>
+          <section className="price-family" key={activeGrupo.familia.id}>
+            <div className="price-family-head">
+              <span className="price-family-icon">
+                {(() => { const Icon = FAMILY_ICONS[activeGrupo.familia.id] || Boxes; return <Icon size={18} />; })()}
+              </span>
+              <h2>{activeGrupo.familia.label}</h2>
+              <span>{activeGrupo.items.length} producto{activeGrupo.items.length === 1 ? '' : 's'}</span>
+            </div>
+            <div className="price-table">
+              <div className="price-table-head">
+                <span>Foto</span>
+                <span>SKU</span>
+                <span>Producto</span>
+                <span>Precio normal</span>
+              </div>
+              <div className="price-table-body">
+                {activeGrupo.items.map((producto) => (
+                  <div className="price-row" key={producto.id}>
+                    <span className="price-cell-foto">
+                      {producto.imagen ? <img src={producto.imagen} alt="" /> : <ImageOff size={18} />}
+                    </span>
+                    <span className="price-cell-sku">{producto.sku || '—'}</span>
+                    <span className="price-cell-nombre">{producto.nombre}</span>
+                    <span className="price-cell-precio">
+                      {producto.precioNormal ? formatPrice(producto.precioNormal) : 'Consultar'}
+                    </span>
                   </div>
-                  <div className="price-table-body">
-                    {items.map((producto) => (
-                      <div className="price-row" key={producto.id}>
-                        <span className="price-cell-foto">
-                          {producto.imagen ? <img src={producto.imagen} alt="" /> : <ImageOff size={18} />}
-                        </span>
-                        <span className="price-cell-sku">{producto.sku || '—'}</span>
-                        <span className="price-cell-nombre">{producto.nombre}</span>
-                        <span className="price-cell-precio">
-                          {producto.precioNormal ? formatPrice(producto.precioNormal) : 'Consultar'}
-                        </span>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              </section>
-            );
-          })}
+                ))}
+              </div>
+            </div>
+          </section>
         </>
       )}
     </>

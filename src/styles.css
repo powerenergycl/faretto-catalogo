@@ -454,10 +454,12 @@ a:focus-visible, button:focus-visible, input:focus-visible {
 .intro-box strong { color: var(--ink); }
 
 .jump-nav { display: flex; flex-wrap: wrap; gap: 8px; margin: 0 0 28px; }
-.jump-pill { display: inline-flex; align-items: center; gap: 6px; border: 1px solid var(--line-soft); background: #fff; color: var(--ink); font-size: 12px; font-weight: 800; padding: 8px 14px; border-radius: 999px; transition: border-color 140ms ease, color 140ms ease; }
+.jump-pill { display: inline-flex; align-items: center; gap: 6px; border: 1px solid var(--line-soft); background: #fff; color: var(--ink); font: inherit; font-size: 12px; font-weight: 800; padding: 8px 14px; border-radius: 999px; cursor: pointer; transition: border-color 140ms ease, color 140ms ease, background 140ms ease; }
 .jump-pill svg { color: var(--teal); flex: none; }
 .jump-pill:hover { border-color: var(--teal); color: var(--teal); }
 .jump-pill span { color: var(--gray); font-weight: 700; }
+.jump-pill.is-active { background: var(--teal); border-color: var(--teal); color: #fff; }
+.jump-pill.is-active svg, .jump-pill.is-active span { color: #fff; }
 
 .price-family + .price-family { margin-top: 28px; }
 .price-family-head { display: flex; align-items: center; gap: 12px; padding-bottom: 12px; border-bottom: 2px solid var(--tint); margin-bottom: 0; scroll-margin-top: 76px; }
