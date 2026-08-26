@@ -9,6 +9,7 @@ import { BlogPostPage } from './pages/BlogPostPage.jsx';
 import { DistribuidoresPage } from './pages/DistribuidoresPage.jsx';
 import { PaginaPage } from './pages/PaginaPage.jsx';
 import { ContactoPage } from './pages/ContactoPage.jsx';
+import { PrecioListaPage } from './pages/PrecioListaPage.jsx';
 import { fetchFarettoProductos, fetchFarettoGaleria } from './lib/api.js';
 
 function parseRoute() {
@@ -64,7 +65,8 @@ export function App() {
   const paginaSlugMatch = route.pathname.match(/^\/pagina\/([^/]+)\/?$/);
   const paginaSlug = isQuienesSomos ? 'quienes-somos' : (paginaSlugMatch ? decodeURIComponent(paginaSlugMatch[1]) : null);
   const isContacto = route.pathname === '/contacto';
-  const isHome = !isCatalogo && !isBlog && !blogSlug && !isDistribuidores && !paginaSlug && !isContacto;
+  const isPrecioLista = route.pathname === '/precio-lista';
+  const isHome = !isCatalogo && !isBlog && !blogSlug && !isDistribuidores && !paginaSlug && !isContacto && !isPrecioLista;
 
   return (
     <div>
@@ -89,6 +91,12 @@ export function App() {
           <PaginaPage slug={paginaSlug} onNavigate={navigate} />
         ) : isContacto ? (
           <ContactoPage />
+        ) : isPrecioLista ? (
+          <>
+            {status === 'loading' && <div className="state-box">Cargando lista de precios…</div>}
+            {status === 'error' && <div className="state-box">No se pudo cargar la lista de precios. Intenta de nuevo más tarde.</div>}
+            {status === 'ready' && <PrecioListaPage productos={productos} />}
+          </>
         ) : (
           // El home no depende del feed de productos para pintar sus
           // secciones (accesos destacados, banners, blog) - solo la franja

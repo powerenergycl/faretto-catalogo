@@ -445,6 +445,60 @@ a:focus-visible, button:focus-visible, input:focus-visible {
 
 .pager { display: flex; align-items: center; justify-content: space-between; margin-top: 22px; font-size: 11.5px; color: #8a97a3; font-weight: 700; text-transform: uppercase; }
 
+/* ---- lista de precios (/precio-lista) ----
+   Informativa, no transaccional: sin botones de compra, solo foto+SKU+
+   nombre+precio de lista agrupados por familia. Mismo lenguaje visual que la
+   ficha de producto (product-sheet-table de arriba: header teal, filas
+   alternadas), pero por SKU puntual, no por "producto principal" agrupado. */
+.intro-box { margin: 0 0 22px; padding: 14px 16px; border-radius: 8px; background: #fff; border: 1px solid #d7dce2; color: var(--gray); font-size: 13px; line-height: 1.6; box-shadow: 0 14px 32px rgba(0,101,120,0.06); display: grid; gap: 6px; }
+.intro-box strong { color: var(--ink); }
+
+.jump-nav { display: flex; flex-wrap: wrap; gap: 8px; margin: 0 0 28px; }
+.jump-pill { display: inline-flex; align-items: center; gap: 6px; border: 1px solid var(--line-soft); background: #fff; color: var(--ink); font-size: 12px; font-weight: 800; padding: 8px 14px; border-radius: 999px; transition: border-color 140ms ease, color 140ms ease; }
+.jump-pill svg { color: var(--teal); flex: none; }
+.jump-pill:hover { border-color: var(--teal); color: var(--teal); }
+.jump-pill span { color: var(--gray); font-weight: 700; }
+
+.price-family + .price-family { margin-top: 28px; }
+.price-family-head { display: flex; align-items: center; gap: 12px; padding-bottom: 12px; border-bottom: 2px solid var(--tint); margin-bottom: 0; scroll-margin-top: 76px; }
+.price-family-icon { flex: none; width: 38px; height: 38px; border-radius: 999px; background: var(--tint); color: var(--teal); display: grid; place-items: center; }
+.price-family-head h2 { font-size: 18px; color: var(--teal); font-weight: 800; margin: 0; flex: 1; }
+.price-family-head span { font-size: 12.5px; color: var(--gray); font-weight: 700; }
+
+.price-table { background: #fff; box-shadow: 0 14px 32px rgba(0,101,120,0.06); border-radius: 0 0 8px 8px; overflow: hidden; }
+.price-table-head, .price-row {
+  display: grid;
+  grid-template-columns: 76px 100px 1fr 150px;
+  grid-template-areas: "foto sku nombre precio";
+  align-items: center;
+}
+.price-table-head { background: var(--teal); color: #fff; font-weight: 800; text-transform: uppercase; font-size: 10.5px; letter-spacing: 0.03em; padding: 10px 14px; }
+.price-table-head span:last-child { text-align: right; }
+.price-row { padding: 10px 14px; font-size: 13px; color: var(--ink); }
+.price-row + .price-row { border-top: 1px solid var(--line); }
+.price-table-body .price-row:nth-child(odd) { background: var(--tint-soft); }
+.price-table-body .price-row:nth-child(even) { background: #fff; }
+.price-cell-foto { grid-area: foto; width: 56px; height: 56px; border-radius: 6px; border: 1px solid var(--line); background: #fff; display: grid; place-items: center; overflow: hidden; padding: 4px; color: #9aa6bb; }
+.price-cell-foto img { width: 100%; height: 100%; object-fit: contain; }
+.price-cell-sku { grid-area: sku; font-family: "SFMono-Regular", Consolas, monospace; font-size: 12px; color: var(--gray); font-weight: 700; }
+.price-cell-nombre { grid-area: nombre; font-weight: 600; line-height: 1.35; }
+.price-cell-precio { grid-area: precio; text-align: right; white-space: nowrap; font-weight: 800; color: var(--teal); font-size: 14.5px; }
+
+@media (max-width: 620px) {
+  .price-table-head { display: none; }
+  .price-row {
+    grid-template-columns: 48px 1fr auto;
+    grid-template-areas: "foto sku precio" "foto nombre precio";
+    row-gap: 2px;
+    column-gap: 10px;
+    padding: 10px 12px;
+  }
+  .price-cell-foto { width: 48px; height: 48px; align-self: center; }
+  .price-cell-sku { font-size: 10.5px; }
+  .price-cell-nombre { font-size: 12px; }
+  .price-cell-precio { align-self: center; font-size: 13.5px; }
+}
+
 /* ---- states ---- */
 .state-box { padding: 40px 16px; text-align: center; color: var(--gray); font-size: 14px; }
 
