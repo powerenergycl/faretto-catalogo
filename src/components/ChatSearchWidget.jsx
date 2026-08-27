@@ -7,7 +7,7 @@ import { FAMILIES, resolveFamily, resolveModelo } from '../lib/api.js';
 // responde con look de chat. Reemplaza al icono de WhatsApp del header
 // (pedido del 27-08-2026) - "hablar con un asesor" queda como salida dentro
 // de las respuestas del bot, no como boton propio en el header.
-const GREETING = '¡Hola! Soy el buscador de Faretto 👋 Escribe un modelo, SKU o tipo de producto — por ejemplo "plafón redondo", "campana UFO" o "2105".';
+const GREETING = '¡Hola! 👋 Escribe un modelo, SKU o tipo de producto — por ejemplo "plafón redondo", "campana UFO" o "2105".';
 
 const SUGGESTIONS = ['Plafones', 'Focos', 'Paneles LED', 'Campanas LED', 'Cintas LED'];
 
