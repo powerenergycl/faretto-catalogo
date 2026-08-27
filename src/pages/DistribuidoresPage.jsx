@@ -50,6 +50,10 @@ function DistributorCard({ item }) {
 
 export function DistribuidoresPage() {
   const [distribuidores, setDistribuidores] = useState(null); // null = todavia no respondio
+  // Pestañas tipo Bootstrap (nav-tabs), no botones/pills - ver .tabs-nav en
+  // styles.css. Una zona por pestaña (hoy Santiago RM / Regiones, pero se
+  // arma dinamico segun lo que traiga groupByZone).
+  const [activeZone, setActiveZone] = useState(null);
 
   useEffect(() => {
     let cancelled = false;
@@ -60,6 +64,7 @@ export function DistribuidoresPage() {
   }, []);
 
   const groups = distribuidores ? groupByZone(distribuidores) : [];
+  const activeGroup = groups.find(({ zone }) => zone === activeZone) || groups[0];
 
   return (
     <>
@@ -74,17 +79,27 @@ export function DistribuidoresPage() {
       ) : groups.length === 0 ? (
         <div className="state-box">Todavía no hay distribuidores publicados.</div>
       ) : (
-        groups.map(({ zone, items }) => (
-          <section className="distributor-zone" key={zone}>
-            <div className="home-section-heading">
-              <h2>{zone}</h2>
-              <p>{items.length} distribuidor{items.length === 1 ? '' : 'es'}</p>
-            </div>
+        <>
+          <div className="tabs-nav" role="tablist">
+            {groups.map(({ zone, items }) => (
+              <button
+                type="button"
+                role="tab"
+                key={zone}
+                aria-selected={activeGroup.zone === zone}
+                className={`tab-link ${activeGroup.zone === zone ? 'is-active' : ''}`}
+                onClick={() => setActiveZone(zone)}
+              >
+                {zone} <span>{items.length}</span>
+              </button>
+            ))}
+          </div>
+          <div className="tabs-panel">
             <div className="distributor-grid">
-              {items.map((item, index) => <DistributorCard item={item} key={`${item.nombre}-${index}`} />)}
+              {activeGroup.items.map((item, index) => <DistributorCard item={item} key={`${item.nombre}-${index}`} />)}
             </div>
-          </section>
-        ))
+          </div>
+        </>
       )}
     </>
   );
