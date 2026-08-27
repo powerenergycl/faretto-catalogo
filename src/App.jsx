@@ -10,6 +10,7 @@ import { DistribuidoresPage } from './pages/DistribuidoresPage.jsx';
 import { PaginaPage } from './pages/PaginaPage.jsx';
 import { ContactoPage } from './pages/ContactoPage.jsx';
 import { PrecioListaPage } from './pages/PrecioListaPage.jsx';
+import { ChatSearchWidget } from './components/ChatSearchWidget.jsx';
 import { fetchFarettoProductos, fetchFarettoGaleria } from './lib/api.js';
 
 function parseRoute() {
@@ -105,6 +106,7 @@ export function App() {
         )}
       </main>
       <Footer />
+      <ChatSearchWidget productos={productos} onNavigate={navigate} />
     </div>
   );
 }

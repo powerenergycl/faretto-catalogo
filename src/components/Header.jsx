@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
-import { MessageCircle, Menu, X, Lightbulb, MapPin, Cable, LayoutGrid, Flashlight, Zap, Boxes, Video, Bell, ShieldAlert, Lamp, ChevronDown, ChevronRight, ArrowRight } from 'lucide-react';
+import { Menu, X, Lightbulb, MapPin, Cable, LayoutGrid, Flashlight, Zap, Boxes, Video, Bell, ShieldAlert, Lamp, ChevronDown, ChevronRight, ArrowRight } from 'lucide-react';
 import { fetchFarettoMenu, FAMILIES, resolveFamily, resolveModelo } from '../lib/api.js';
 
 // Solo 2 rutas reales por ahora (Home y Catalogo, por eso el pedido
@@ -230,11 +230,10 @@ export function Header({ route, onNavigate, productos = [] }) {
           })}
         </nav>
         <div className="header-icons">
-          {/* Sin cuenta ni carrito propios: este sitio es catalogo, no
-              ecommerce. El unico "CTA de conversion" es cotizar por WhatsApp. */}
-          <a className="icon-btn" href="https://wa.me/" target="_blank" rel="noreferrer" aria-label="Cotizar por WhatsApp">
-            <MessageCircle size={18} />
-          </a>
+          {/* El icono de WhatsApp que vivia aca se saco (27-08-2026): el CTA
+              de conversion ahora es el buscador tipo chat fijo abajo a la
+              derecha (ChatSearchWidget.jsx), que igual ofrece WhatsApp como
+              salida cuando no encuentra resultados. */}
           <button
             type="button"
             className="icon-btn nav-burger"

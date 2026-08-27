@@ -532,3 +532,52 @@ a:focus-visible, button:focus-visible, input:focus-visible {
 .footer-grid h4 { color: var(--teal); font-size: 14px; margin-bottom: 10px; }
 .footer-grid a, .footer-grid p { display: block; color: var(--gray); font-size: 12.5px; padding: 4px 0; margin: 0; }
 .footer-legal { display: flex; justify-content: center; gap: 16px; max-width: 1180px; margin: 18px auto 0; padding-top: 14px; border-top: 1px solid var(--line); font-size: 11px; color: var(--gray); }
+
+/* ---- buscador tipo chat (ChatSearchWidget.jsx) ----
+   Fijo abajo a la derecha, reemplaza al icono de WhatsApp del header
+   (27-08-2026) como CTA de conversion. Busqueda local por texto sobre el
+   catalogo ya cargado, sin IA real - el look de chat es solo la interfaz. */
+.chat-widget { position: fixed; right: clamp(14px, 3vw, 28px); bottom: clamp(14px, 3vw, 28px); z-index: 200; display: grid; justify-items: end; gap: 12px; }
+.chat-fab { width: 56px; height: 56px; border-radius: 999px; border: 0; background: var(--teal); color: #fff; display: grid; place-items: center; box-shadow: 0 14px 32px rgba(0,101,120,0.32); cursor: pointer; transition: background 160ms ease, transform 160ms ease; }
+.chat-fab:hover { background: var(--teal-dark); transform: translateY(-2px); }
+
+.chat-panel { width: min(360px, calc(100vw - 28px)); max-height: min(560px, calc(100vh - 120px)); background: #fff; border: 1px solid var(--line); border-radius: 14px; box-shadow: 0 24px 56px rgba(0,101,120,0.22); display: grid; grid-template-rows: auto 1fr auto; overflow: hidden; }
+.chat-panel-head { background: var(--teal); color: #fff; padding: 12px 14px; display: flex; align-items: center; justify-content: space-between; font-size: 13px; font-weight: 800; }
+.chat-panel-head span { display: inline-flex; align-items: center; gap: 8px; }
+.chat-panel-head button { background: none; border: 0; color: #fff; opacity: 0.85; cursor: pointer; display: grid; place-items: center; }
+.chat-panel-head button:hover { opacity: 1; }
+
+.chat-log { padding: 14px; overflow-y: auto; display: grid; gap: 10px; align-content: start; }
+.chat-bubble { max-width: 88%; display: grid; gap: 8px; }
+.chat-bubble p { margin: 0; font-size: 12.5px; line-height: 1.5; padding: 9px 12px; border-radius: 12px; }
+.chat-bubble p a { text-decoration: underline; font-weight: 700; }
+.chat-bubble-bot { justify-self: start; }
+.chat-bubble-bot p { background: var(--tint-soft); color: var(--ink); border-bottom-left-radius: 4px; }
+.chat-bubble-bot p a { color: var(--teal); }
+.chat-bubble-user { justify-self: end; }
+.chat-bubble-user p { background: var(--teal); color: #fff; border-bottom-right-radius: 4px; }
+
+.chat-results { display: grid; gap: 6px; width: 100%; }
+.chat-result-card { display: flex; align-items: center; gap: 8px; padding: 7px 8px; background: #fff; border: 1px solid var(--line); border-radius: 8px; transition: border-color 140ms ease; }
+.chat-result-card:hover { border-color: var(--teal); }
+.chat-result-thumb { flex: none; width: 38px; height: 38px; border-radius: 6px; border: 1px solid var(--line); background: var(--tint-soft); display: grid; place-items: center; overflow: hidden; color: #9aa6bb; }
+.chat-result-thumb img { width: 100%; height: 100%; object-fit: contain; }
+.chat-result-copy { flex: 1; min-width: 0; display: grid; gap: 1px; }
+.chat-result-copy strong { font-size: 11.5px; color: var(--ink); line-height: 1.3; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+.chat-result-copy small { font-size: 10px; color: var(--teal); font-weight: 700; }
+.chat-result-arrow { flex: none; color: var(--line-soft); }
+.chat-result-card:hover .chat-result-arrow { color: var(--teal); }
+
+.chat-suggestions { display: flex; flex-wrap: wrap; gap: 6px; justify-self: start; }
+.chat-suggestions button { border: 1px solid var(--line-soft); background: #fff; color: var(--teal); font-size: 11.5px; font-weight: 800; padding: 6px 11px; border-radius: 999px; cursor: pointer; transition: background 140ms ease, border-color 140ms ease; }
+.chat-suggestions button:hover { background: var(--tint-soft); border-color: var(--teal); }
+
+.chat-input-row { display: flex; align-items: center; gap: 8px; padding: 10px; border-top: 1px solid var(--line); }
+.chat-input-row input { flex: 1; min-width: 0; border: 1px solid var(--line-soft); border-radius: 999px; padding: 9px 14px; font: inherit; font-size: 12.5px; color: var(--ink); }
+.chat-input-row input:focus { outline: none; border-color: var(--teal); }
+.chat-input-row button { flex: none; width: 36px; height: 36px; border-radius: 999px; border: 0; background: var(--teal); color: #fff; display: grid; place-items: center; cursor: pointer; }
+.chat-input-row button:hover { background: var(--teal-dark); }
+
+@media (max-width: 480px) {
+  .chat-panel { max-height: min(70vh, 520px); }
+}
