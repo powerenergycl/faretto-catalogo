@@ -8,12 +8,24 @@
 const API_BASE = import.meta.env.VITE_SITIO_POWER_API_BASE || 'https://powerenergy.cl';
 
 export async function fetchFarettoProductos() {
-  const response = await fetch(`${API_BASE}/api/public/faretto-productos`);
+  // Los nombres editables de familia/modelo (Power Admin > Faretto > Nombres)
+  // se aplican antes de devolver el feed, para que resolveFamily/resolveModelo
+  // ya los usen en el primer render. Si falla, se sigue con los derivados.
+  const [response] = await Promise.all([
+    fetch(`${API_BASE}/api/public/faretto-productos`),
+    fetchFarettoNombres().then(applyFarettoNombres).catch(() => {})
+  ]);
   if (!response.ok) {
     throw new Error(`No se pudo cargar el catálogo (HTTP ${response.status})`);
   }
   const data = await response.json();
   return Array.isArray(data.productos) ? data.productos : [];
+}
+
+async function fetchFarettoNombres() {
+  const response = await fetch(`${API_BASE}/api/public/faretto-nombres`);
+  if (!response.ok) return { familias: {}, modelos: {} };
+  return response.json();
 }
 
 // Galeria de fichas (6 fotos por familia+modelo): administrable desde Power
@@ -206,9 +218,11 @@ const FAMILY_RULES = [
   { id: 'accesorios-componentes', label: 'Accesorios y Componentes', test: /^fuente\b|^fotocelda\b|^sensor\b|^conector\b|^protector\b|^regleta\b|^marco\b/i }
 ];
 
+const OTROS_FAMILY = { id: 'otros', label: 'Otros' };
+
 export function resolveFamily(nombre = '') {
   const match = FAMILY_RULES.find((rule) => rule.test.test(nombre));
-  return match || { id: 'otros', label: 'Otros' };
+  return match || OTROS_FAMILY;
 }
 
 // Lumex no es una familia (no describe un tipo de producto) - es una linea
@@ -222,7 +236,23 @@ export function isLumex(nombre = '') {
 // "Otros" al final: cubre lo que de verdad no tiene una familia clara
 // (tortugas, calugas, iluminacion solar puntual, postes, etc. - un residual
 // chico y genuinamente variado, no ya ~200 SKU por falta de reglas).
-export const FAMILIES = [...FAMILY_RULES.map(({ id, label }) => ({ id, label })), { id: 'otros', label: 'Otros' }];
+export const FAMILIES = [...FAMILY_RULES.map(({ id, label }) => ({ id, label })), OTROS_FAMILY];
+
+// Nombres editables desde Power Admin (tabla faretto_nombres en sitio_power):
+// solo cambian el nombre a MOSTRAR, la clasificacion sigue derivandose del
+// nombre del producto. Mismo criterio que displayFarettoModelo /
+// displayFarettoFamilia en sitio_power/backend publicCatalogService.js. Las
+// etiquetas se pisan en el lugar (FAMILIES y FAMILY_RULES) para no tener que
+// tocar a quienes ya las importan.
+const ORIGINAL_FAMILY_LABELS = new Map([...FAMILY_RULES, OTROS_FAMILY].map(({ id, label }) => [id, label]));
+let modeloNombres = {};
+
+export function applyFarettoNombres({ familias = {}, modelos = {} } = {}) {
+  modeloNombres = modelos;
+  for (const target of [...FAMILIES, ...FAMILY_RULES]) {
+    target.label = familias[target.id] || ORIGINAL_FAMILY_LABELS.get(target.id);
+  }
+}
 
 // El feed nombra el modelo al final del nombre ("... Faretto Modelo X") -
 // mismo patron en casi todo el catalogo. Se usa para el submenu de
@@ -231,7 +261,9 @@ const MODELO_RULE = /\bmodelo\s+(.+)$/i;
 
 export function resolveModelo(nombre = '') {
   const match = nombre.match(MODELO_RULE);
-  return match ? match[1].trim() : null;
+  if (!match) return null;
+  const modelo = match[1].trim();
+  return modeloNombres[normalizeForKey(modelo)] || modelo;
 }
 
 // --- Agrupacion de fichas por modelo ---------------------------------------
