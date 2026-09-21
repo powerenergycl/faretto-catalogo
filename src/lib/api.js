@@ -263,7 +263,10 @@ export function resolveModelo(nombre = '') {
   const match = nombre.match(MODELO_RULE);
   if (!match) return null;
   const modelo = match[1].trim();
-  return modeloNombres[normalizeForKey(modelo)] || modelo;
+  // Clave "familia::modelo" (independiente por familia); las claves viejas sin
+  // familia valen como global. Mismo criterio que displayFarettoModelo en sitio_power.
+  const key = normalizeForKey(modelo);
+  return modeloNombres[`${resolveFamily(nombre).id}::${key}`] || modeloNombres[key] || modelo;
 }
 
 // --- Agrupacion de fichas por modelo ---------------------------------------
