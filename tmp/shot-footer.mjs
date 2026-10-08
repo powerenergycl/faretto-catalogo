@@ -1,0 +1,10 @@
+import { chromium } from 'playwright';
+const browser = await chromium.launch();
+const page = await browser.newPage({ viewport: { width: 1280, height: 500 } });
+await page.goto('https://faretto.cl/', { waitUntil: 'networkidle' });
+await page.evaluate(() => document.querySelector('.store-footer')?.scrollIntoView());
+await page.waitForTimeout(500);
+const footer = page.locator('.store-footer');
+await footer.screenshot({ path: 'tmp/footer-live.png' });
+await browser.close();
+console.log('done');

@@ -1,0 +1,10 @@
+import { chromium } from 'playwright';
+const browser = await chromium.launch();
+const page = await browser.newPage({ viewport: { width: 390, height: 800 } });
+await page.goto('http://localhost:4328/', { waitUntil: 'networkidle' });
+await page.waitForTimeout(800);
+await page.locator('.chat-fab').click();
+await page.waitForTimeout(300);
+await page.screenshot({ path: 'tmp/chat-mobile-open.png' });
+await browser.close();
+console.log('done');
