@@ -5,7 +5,42 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <link rel="icon" type="image/webp" href="/assets/logo-faretto.webp" />
     <title>Faretto — Catálogo</title>
-    <meta name="description" content="Catálogo Faretto: plafones, paneles LED, luminaria pública y cintas LED. Distribuido por Power Energy." />
+    <meta name="description" content="Catálogo Faretto: plafones, paneles LED, luminaria pública y cintas LED. Power Energy (powerenergy.cl) es distribuidor autorizado de Faretto en Chile." />
+    <link rel="publisher" href="https://www.powerenergy.cl" />
+    <!-- Datos estructurados: declara a Power Energy como distribuidor autorizado
+         de Faretto. No se renderiza, pero Google lo usa para entender la relacion
+         entre ambas marcas (no usar texto oculto: lo penaliza como spam). -->
+    <script type="application/ld+json">
+      {
+        "@context": "https://schema.org",
+        "@graph": [
+          {
+            "@type": "Brand",
+            "@id": "https://www.powerenergy.cl/#faretto",
+            "name": "Faretto",
+            "slogan": "Illuminazione e Design"
+          },
+          {
+            "@type": "Organization",
+            "@id": "https://www.powerenergy.cl/#organization",
+            "name": "Power Energy",
+            "url": "https://www.powerenergy.cl",
+            "description": "Power Energy es distribuidor autorizado de la marca de iluminación Faretto en Chile: plafones, paneles LED, luminaria pública, focos y cintas LED.",
+            "areaServed": { "@type": "Country", "name": "Chile" },
+            "brand": { "@id": "https://www.powerenergy.cl/#faretto" },
+            "knowsAbout": ["Iluminación LED", "Faretto", "Luminaria pública", "Paneles LED", "Cintas LED"]
+          },
+          {
+            "@type": "WebSite",
+            "name": "Catálogo Faretto",
+            "description": "Catálogo oficial Faretto, distribuido en Chile por Power Energy (distribuidor autorizado).",
+            "inLanguage": "es-CL",
+            "publisher": { "@id": "https://www.powerenergy.cl/#organization" },
+            "about": { "@id": "https://www.powerenergy.cl/#faretto" }
+          }
+        ]
+      }
+    </script>
   </head>
   <body>
     <div id="root"></div>
