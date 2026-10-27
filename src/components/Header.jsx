@@ -32,7 +32,7 @@ const FAMILY_ICONS = {
   'equipos-emergencia': ShieldAlert,
   colgantes: Lamp,
   otros: Boxes
-  // El resto de las familias nuevas (ver FAMILY_RULES en lib/api.js) cae al
+  // El resto de las familias nuevas (ver FAMILY_RULES en lib/families.js) cae al
   // fallback Boxes de abajo - no todas necesitan un icono propio distinto.
 };
 
