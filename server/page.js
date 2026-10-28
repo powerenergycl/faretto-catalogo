@@ -10,7 +10,7 @@ export const SITE_URL = (process.env.SITE_URL || 'https://www.faretto.cl').repla
 const DEFAULT_IMAGE = `${SITE_URL}/assets/logo-faretto.webp`;
 const ORG_ID = 'https://www.powerenergy.cl/#organization';
 const BRAND = { '@type': 'Brand', '@id': 'https://www.powerenergy.cl/#faretto', name: 'Faretto' };
-const DISTRIBUIDOR = 'Power Energy, distribuidor autorizado Faretto en Chile.';
+const DISTRIBUIDOR = 'Power Energy, distribuidor autorizado de Faretto y Lumex en Chile.';
 
 const unique = (values) => [...new Set(values.filter(Boolean))];
 const truncate = (text, max = 300) => (text.length > max ? `${text.slice(0, max - 1).replace(/\s+\S*$/, '')}…` : text);

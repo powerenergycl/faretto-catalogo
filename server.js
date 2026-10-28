@@ -6,6 +6,7 @@ import { fileURLToPath, pathToFileURL } from 'node:url';
 import { getProductos } from './server/data.js';
 import { loadPage, headTags, safeJson, SITE_URL } from './server/page.js';
 import { sitemapXml } from './server/sitemap.js';
+import { llmsTxt } from './server/llms.js';
 
 // Sirve el build (dist/) renderizando cada pagina del lado del servidor con
 // los mismos componentes React del navegador (dist/server/entry-server.js),
@@ -38,6 +39,12 @@ app.get('/healthz', (_req, res) => {
 
 app.get('/robots.txt', (_req, res) => {
   res.type('text/plain').send(`User-agent: *\nAllow: /\n\nSitemap: ${SITE_URL}/sitemap.xml\n`);
+});
+
+app.get('/llms.txt', async (_req, res) => {
+  if (!ssr) return res.status(503).end();
+  res.set('Cache-Control', 'public, max-age=3600');
+  res.type('text/markdown').send(await llmsTxt(ssr));
 });
 
 app.get('/sitemap.xml', async (_req, res) => {

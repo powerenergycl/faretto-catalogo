@@ -5,10 +5,10 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <link rel="icon" type="image/webp" href="/assets/logo-faretto.webp" />
     <title>Faretto — Catálogo</title>
-    <meta name="description" content="Catálogo Faretto: plafones, paneles LED, luminaria pública y cintas LED. Power Energy (powerenergy.cl) es distribuidor autorizado de Faretto en Chile." />
+    <meta name="description" content="Catálogo Faretto: plafones, paneles LED, luminaria pública y cintas LED. Power Energy (powerenergy.cl) es distribuidor autorizado de las marcas Faretto y Lumex en Chile." />
     <link rel="publisher" href="https://www.powerenergy.cl" />
     <!-- Datos estructurados: declara a Power Energy como distribuidor autorizado
-         de Faretto. No se renderiza, pero Google lo usa para entender la relacion
+         de Faretto y Lumex. No se renderiza, pero Google lo usa para entender la relacion
          entre ambas marcas (no usar texto oculto: lo penaliza como spam). -->
     <script type="application/ld+json">
       {
@@ -21,22 +21,28 @@
             "slogan": "Illuminazione e Design"
           },
           {
+            "@type": "Brand",
+            "@id": "https://www.powerenergy.cl/#lumex",
+            "name": "Lumex",
+            "slogan": "Iluminación y diseño"
+          },
+          {
             "@type": "Organization",
             "@id": "https://www.powerenergy.cl/#organization",
             "name": "Power Energy",
             "url": "https://www.powerenergy.cl",
-            "description": "Power Energy es distribuidor autorizado de la marca de iluminación Faretto en Chile: plafones, paneles LED, luminaria pública, focos y cintas LED.",
+            "description": "Power Energy es distribuidor autorizado de las marcas de iluminación Faretto y Lumex en Chile: plafones, paneles LED, luminaria pública, focos, campanas industriales, equipos estancos y cintas LED.",
             "areaServed": { "@type": "Country", "name": "Chile" },
-            "brand": { "@id": "https://www.powerenergy.cl/#faretto" },
-            "knowsAbout": ["Iluminación LED", "Faretto", "Luminaria pública", "Paneles LED", "Cintas LED"]
+            "brand": [{ "@id": "https://www.powerenergy.cl/#faretto" }, { "@id": "https://www.powerenergy.cl/#lumex" }],
+            "knowsAbout": ["Iluminación LED", "Faretto", "Lumex", "Luminaria pública", "Paneles LED", "Cintas LED"]
           },
           {
             "@type": "WebSite",
             "name": "Catálogo Faretto",
-            "description": "Catálogo oficial Faretto, distribuido en Chile por Power Energy (distribuidor autorizado).",
+            "description": "Catálogo oficial Faretto y Lumex, distribuido en Chile por Power Energy (distribuidor autorizado de ambas marcas).",
             "inLanguage": "es-CL",
             "publisher": { "@id": "https://www.powerenergy.cl/#organization" },
-            "about": { "@id": "https://www.powerenergy.cl/#faretto" }
+            "about": [{ "@id": "https://www.powerenergy.cl/#faretto" }, { "@id": "https://www.powerenergy.cl/#lumex" }]
           }
         ]
       }
