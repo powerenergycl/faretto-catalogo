@@ -1,6 +1,8 @@
 import { useEffect, useState } from 'react';
 import { Building2, MapPin, Phone, Mail } from 'lucide-react';
 import { fetchFarettoDistribuidores } from '../lib/api.js';
+import { useInitialData } from '../lib/initialData.js';
+import { usePageTitle, pageTitle } from '../lib/seo.js';
 
 // Orden de despliegue de las zonas: "Santiago RM" siempre primero (asi vino
 // la lista original del cliente), cualquier otra zona que se agregue despues
@@ -49,13 +51,16 @@ function DistributorCard({ item }) {
 }
 
 export function DistribuidoresPage() {
-  const [distribuidores, setDistribuidores] = useState(null); // null = todavia no respondio
+  const initialDistribuidores = useInitialData('distribuidores');
+  const [distribuidores, setDistribuidores] = useState(initialDistribuidores || null); // null = todavia no respondio
+  usePageTitle(pageTitle({ name: 'distribuidores' }));
   // Pestañas tipo Bootstrap (nav-tabs), no botones/pills - ver .tabs-nav en
   // styles.css. Una zona por pestaña (hoy Santiago RM / Regiones, pero se
   // arma dinamico segun lo que traiga groupByZone).
   const [activeZone, setActiveZone] = useState(null);
 
   useEffect(() => {
+    if (initialDistribuidores) return undefined;
     let cancelled = false;
     fetchFarettoDistribuidores()
       .then((data) => { if (!cancelled) setDistribuidores(data); })

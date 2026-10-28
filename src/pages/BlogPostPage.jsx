@@ -1,12 +1,19 @@
 import { useEffect, useState } from 'react';
 import { fetchFarettoBlogPost } from '../lib/api.js';
 import { formatBlogDate } from './BlogPage.jsx';
+import { useInitialData } from '../lib/initialData.js';
+import { usePageTitle, pageTitle } from '../lib/seo.js';
+import { NotFoundPage } from './NotFoundPage.jsx';
 
 export function BlogPostPage({ slug, onNavigate }) {
   // undefined = todavia cargando, null = no existe (o no es de Faretto)
-  const [post, setPost] = useState(undefined);
+  const initialPost = useInitialData('blogPost');
+  // Lo que el servidor ya resolvio para este slug (null = no existe).
+  const fromServer = initialPost?.slug === slug ? (initialPost.notFound ? null : initialPost) : undefined;
+  const [post, setPost] = useState(fromServer);
 
   useEffect(() => {
+    if (fromServer !== undefined) return undefined;
     let cancelled = false;
     setPost(undefined);
     fetchFarettoBlogPost(slug)
@@ -15,28 +22,14 @@ export function BlogPostPage({ slug, onNavigate }) {
     return () => { cancelled = true; };
   }, [slug]);
 
-  // Sin SSR en este proyecto (server.js solo sirve el build estatico), asi
-  // que esto es lo unico que ajusta el titulo de la pestaña/reader mode -
-  // no reemplaza <head> real para crawlers, pero es gratis tenerlo.
-  useEffect(() => {
-    if (post?.titulo) document.title = `${post.titulo} — Faretto`;
-    return () => { document.title = 'Faretto — Catálogo'; };
-  }, [post]);
+  // El <title> inicial lo pone el servidor; esto lo mantiene al navegar.
+  usePageTitle(post?.titulo ? (post.seo_title || pageTitle({ name: 'blogPost', titulo: post.titulo })) : null);
 
   if (post === undefined) {
     return <div className="state-box">Cargando artículo…</div>;
   }
 
-  if (!post) {
-    return (
-      <div className="state-box">
-        No encontramos este artículo.{' '}
-        <a href="/blog" onClick={(event) => { event.preventDefault(); onNavigate('/blog'); }}>
-          Volver al blog
-        </a>
-      </div>
-    );
-  }
+  if (!post) return <NotFoundPage onNavigate={onNavigate} />;
 
   return (
     <article className="blog-post">

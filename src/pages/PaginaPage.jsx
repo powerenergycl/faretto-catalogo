@@ -1,5 +1,8 @@
 import { useEffect, useState } from 'react';
 import { fetchFarettoPagina } from '../lib/api.js';
+import { useInitialData } from '../lib/initialData.js';
+import { usePageTitle, pageTitle } from '../lib/seo.js';
+import { NotFoundPage } from './NotFoundPage.jsx';
 
 // Pagina de contenido generica (ej. /quienes-somos): administrable desde
 // Power Admin > sitio Faretto > grupo Faretto > Páginas. Cualquier pagina
@@ -7,9 +10,13 @@ import { fetchFarettoPagina } from '../lib/api.js';
 // -- ver App.jsx para el ruteo de /quienes-somos especificamente.
 export function PaginaPage({ slug, onNavigate }) {
   // undefined = todavia cargando, null = no existe (o no esta publicada)
-  const [pagina, setPagina] = useState(undefined);
+  const initialPagina = useInitialData('pagina');
+  // Lo que el servidor ya resolvio para este slug (null = no existe).
+  const fromServer = initialPagina?.slug === slug ? (initialPagina.notFound ? null : initialPagina) : undefined;
+  const [pagina, setPagina] = useState(fromServer);
 
   useEffect(() => {
+    if (fromServer !== undefined) return undefined;
     let cancelled = false;
     setPagina(undefined);
     fetchFarettoPagina(slug)
@@ -18,25 +25,13 @@ export function PaginaPage({ slug, onNavigate }) {
     return () => { cancelled = true; };
   }, [slug]);
 
-  useEffect(() => {
-    if (pagina?.titulo) document.title = `${pagina.titulo} — Faretto`;
-    return () => { document.title = 'Faretto — Catálogo'; };
-  }, [pagina]);
+  usePageTitle(pagina?.titulo ? (pagina.seo_title || pageTitle({ name: 'pagina', titulo: pagina.titulo })) : null);
 
   if (pagina === undefined) {
     return <div className="state-box">Cargando página…</div>;
   }
 
-  if (!pagina) {
-    return (
-      <div className="state-box">
-        No encontramos esta página.{' '}
-        <a href="/" onClick={(event) => { event.preventDefault(); onNavigate('/'); }}>
-          Volver al inicio
-        </a>
-      </div>
-    );
-  }
+  if (!pagina) return <NotFoundPage onNavigate={onNavigate} />;
 
   return (
     <article className="static-page">
