@@ -1,19 +1,21 @@
 import { useMemo, useState } from 'react';
 import { ProductCard } from '../components/ProductCard.jsx';
-import { FAMILIES, resolveFamily, resolveModelo, buildProductGroups, isLumex } from '../lib/api.js';
+import { FAMILIES, resolveFamily, resolveModelo, modeloSlug, buildProductGroups, isLumex } from '../lib/api.js';
+import { familyPath } from '../lib/routes.js';
+import { usePageTitle, pageTitle, modeloHeading } from '../lib/seo.js';
+import { NotFoundPage } from './NotFoundPage.jsx';
 
 const PAGE_SIZE = 24;
 
+// route viene de parseRoute (lib/routes.js): /catalogo, /catalogo/<familia>,
+// /catalogo/<familia>/<modelo> (pagina propia del modelo) o /lumex.
 export function CategoryPage({ productos, galeriaGrupos, route, onNavigate }) {
-  const params = new URLSearchParams(route.search);
-  const activeFamily = params.get('familia') || '';
-  const activeModelo = params.get('modelo') || '';
+  const activeFamily = route.familia || '';
+  const activeModeloSlug = route.name === 'modelo' ? route.modelo : '';
   // Lumex cruza varias familias reales (no es una familia propia, ver
-  // isLumex en lib/api.js) - "marca" gana por sobre "familia"/"modelo" si
-  // ambos vinieran en la URL, junta las ~11 fichas en una sola vista sin
+  // isLumex en lib/api.js) - junta las ~11 fichas en una sola vista sin
   // sidebar de familia (no hay una familia unica que mostrar ahi).
-  const activeMarca = params.get('marca') || '';
-  const isLumexView = activeMarca === 'lumex';
+  const isLumexView = route.name === 'lumex';
   const [visibleCount, setVisibleCount] = useState(PAGE_SIZE);
 
   const byFamily = useMemo(() => {
@@ -28,18 +30,19 @@ export function CategoryPage({ productos, galeriaGrupos, route, onNavigate }) {
   // nombre (ej. cintas LED nunca), asi que a veces queda vacio.
   const modelosDeLaFamilia = useMemo(() => {
     if (!activeFamily || isLumexView) return [];
-    const modelos = new Set();
+    const modelos = new Map();
     for (const product of byFamily) {
-      const modelo = resolveModelo(product.nombre);
-      if (modelo) modelos.add(modelo);
+      const slug = modeloSlug(product.nombre);
+      if (slug && !modelos.has(slug)) modelos.set(slug, { slug, label: resolveModelo(product.nombre) });
     }
-    return [...modelos].sort((a, b) => a.localeCompare(b));
+    return [...modelos.values()].sort((a, b) => a.label.localeCompare(b.label));
   }, [byFamily, activeFamily, isLumexView]);
 
   const filtered = useMemo(() => {
-    if (!activeModelo) return byFamily;
-    return byFamily.filter((product) => resolveModelo(product.nombre) === activeModelo);
-  }, [byFamily, activeModelo]);
+    if (!activeModeloSlug) return byFamily;
+    return byFamily.filter((product) => modeloSlug(product.nombre) === activeModeloSlug);
+  }, [byFamily, activeModeloSlug]);
+  const activeModelo = modelosDeLaFamilia.find((modelo) => modelo.slug === activeModeloSlug)?.label || '';
 
   // La ficha ahora es por "modelo" (1 foto + tabla de variantes), no por SKU
   // - varios SKU del feed se agrupan en una sola ficha (ver buildProductGroups).
@@ -47,24 +50,27 @@ export function CategoryPage({ productos, galeriaGrupos, route, onNavigate }) {
   const visible = fichas.slice(0, visibleCount);
   const activeFamilyLabel = FAMILIES.find((family) => family.id === activeFamily)?.label;
 
+  const modeloNoExiste = route.name === 'modelo' && !activeModelo;
+  // Con modelo inexistente el titulo lo pone NotFoundPage (los efectos del
+  // hijo corren antes que los del padre, asi que aca no se pisa).
+  usePageTitle(modeloNoExiste ? null : pageTitle({ name: route.name, familia: activeFamilyLabel, modelo: activeModelo }));
+
   function selectFamily(familyId) {
     setVisibleCount(PAGE_SIZE);
-    onNavigate(familyId ? `/catalogo?familia=${familyId}` : '/catalogo');
+    onNavigate(familyPath(familyId));
   }
 
-  function selectModelo(modelo) {
+  function selectModelo(slug) {
     setVisibleCount(PAGE_SIZE);
-    if (activeModelo === modelo) {
-      onNavigate(`/catalogo?familia=${activeFamily}`);
-    } else {
-      onNavigate(`/catalogo?familia=${activeFamily}&modelo=${encodeURIComponent(modelo)}`);
-    }
+    onNavigate(activeModeloSlug === slug ? familyPath(activeFamily) : `${familyPath(activeFamily)}/${slug}`);
   }
+
+  if (modeloNoExiste) return <NotFoundPage onNavigate={onNavigate} />;
 
   return (
     <>
       <div className="breadcrumb">
-        Inicio <b>/</b> {isLumexView ? 'Lumex' : (activeModelo ? <>{activeFamilyLabel} <b>/</b> Modelo {activeModelo}</> : (activeFamilyLabel || 'Catálogo Faretto'))}
+        Inicio <b>/</b> {isLumexView ? 'Lumex' : (activeModelo ? <><a href={familyPath(activeFamily)} onClick={(event) => { event.preventDefault(); selectFamily(activeFamily); }}>{activeFamilyLabel}</a> <b>/</b> Modelo {activeModelo}</> : (activeFamilyLabel || 'Catálogo Faretto'))}
       </div>
 
       {isLumexView ? (
@@ -75,26 +81,33 @@ export function CategoryPage({ productos, galeriaGrupos, route, onNavigate }) {
           <p>Línea Lumex dentro del catálogo Faretto: campanas industriales, paneles LED y equipos estancos.</p>
         </div>
       ) : (
-        <h1 className="cat-title">{activeFamilyLabel || 'Catálogo Faretto'}</h1>
+        <h1 className="cat-title">{activeModelo ? modeloHeading(activeFamilyLabel, activeModelo) : (activeFamilyLabel || 'Catálogo Faretto')}</h1>
       )}
 
       <div className={`cat-body ${activeFamily && !isLumexView ? '' : 'cat-body-full'}`}>
         {activeFamily && !isLumexView && (
           <aside className="filter-sidebar">
             <div className="filter-tree">
-              <button className={!activeModelo ? 'active' : ''} onClick={() => selectFamily(activeFamily)}>
+              <a
+                href={familyPath(activeFamily)}
+                className={!activeModelo ? 'active' : ''}
+                onClick={(event) => { event.preventDefault(); selectFamily(activeFamily); }}
+              >
                 {activeFamilyLabel}
-              </button>
+              </a>
               {modelosDeLaFamilia.length > 0 && (
                 <div className="filter-tree filter-tree-sub">
+                  {/* Links reales (no solo botones) para que los buscadores
+                      sigan la navegacion hacia cada pagina de modelo. */}
                   {modelosDeLaFamilia.map((modelo) => (
-                    <button
-                      key={modelo}
-                      className={activeModelo === modelo ? 'active' : ''}
-                      onClick={() => selectModelo(modelo)}
+                    <a
+                      key={modelo.slug}
+                      href={`${familyPath(activeFamily)}/${modelo.slug}`}
+                      className={activeModeloSlug === modelo.slug ? 'active' : ''}
+                      onClick={(event) => { event.preventDefault(); selectModelo(modelo.slug); }}
                     >
-                      {modelo}
-                    </button>
+                      {modelo.label}
+                    </a>
                   ))}
                 </div>
               )}

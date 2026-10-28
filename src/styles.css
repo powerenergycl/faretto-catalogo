@@ -399,9 +399,9 @@ a:focus-visible, button:focus-visible, input:focus-visible {
 .filter-sidebar-heading { display: grid; gap: 4px; border-bottom: 1px solid var(--line); padding-bottom: 10px; }
 .filter-sidebar-heading span { font-size: 10px; font-weight: 900; text-transform: uppercase; color: var(--gray); }
 .filter-tree { display: grid; gap: 3px; }
-.filter-tree button { display: flex; align-items: center; gap: 8px; padding: 7px 9px; border: 0; border-radius: 8px; font-size: 12.5px; color: var(--gray); background: transparent; text-align: left; width: 100%; }
-.filter-tree button.active { background: var(--tint); color: var(--teal); font-weight: 800; }
-.filter-tree button:hover:not(.active) { background: var(--tint-soft); color: var(--teal); }
+.filter-tree button, .filter-tree a { display: flex; align-items: center; gap: 8px; padding: 7px 9px; border: 0; border-radius: 8px; font-size: 12.5px; color: var(--gray); background: transparent; text-align: left; width: 100%; text-decoration: none; }
+.filter-tree button.active, .filter-tree a.active { background: var(--tint); color: var(--teal); font-weight: 800; }
+.filter-tree button:hover:not(.active), .filter-tree a:hover:not(.active) { background: var(--tint-soft); color: var(--teal); }
 .filter-tree-sub { margin: 2px 0 4px 14px; padding-left: 8px; border-left: 2px solid var(--line); }
 .filter-tree-sub button { font-size: 11.5px; padding: 5px 9px; }
 

@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { MessageCircle, ShoppingCart, Users2, LifeBuoy, HelpCircle, Send, CheckCircle2 } from 'lucide-react';
 import { submitFarettoContacto } from '../lib/api.js';
+import { usePageTitle, pageTitle } from '../lib/seo.js';
 
 // Mismas categorias que el selector "Asunto" de la referencia entregada por
 // el cliente (Ventas al mayor / Distribuidor / Información y Productos /
@@ -18,6 +19,7 @@ const ASUNTOS = [
 const EMPTY_FORM = { nombre: '', email: '', telefono: '', asunto: '', mensaje: '' };
 
 export function ContactoPage() {
+  usePageTitle(pageTitle({ name: 'contacto' }));
   const [form, setForm] = useState(EMPTY_FORM);
   const [status, setStatus] = useState('idle'); // idle | sending | sent | error
   const [error, setError] = useState('');

@@ -9,11 +9,11 @@ export function Footer() {
         <div>
           <h4>Catálogo</h4>
           <a href="/catalogo">Catálogo completo</a>
-          <a href="/catalogo?familia=plafones">Plafones</a>
-          <a href="/catalogo?familia=luminaria-publica">Luminaria pública</a>
-          <a href="/catalogo?familia=cintas-led">Cintas LED</a>
-          <a href="/catalogo?familia=paneles-led">Paneles LED</a>
-          <a href="/catalogo?familia=focos">Focos</a>
+          <a href="/catalogo/plafones">Plafones</a>
+          <a href="/catalogo/luminaria-publica">Luminaria pública</a>
+          <a href="/catalogo/cintas-led">Cintas LED</a>
+          <a href="/catalogo/paneles-led">Paneles LED</a>
+          <a href="/catalogo/focos">Focos</a>
         </div>
         <div>
           <h4>La empresa</h4>

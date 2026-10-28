@@ -3,6 +3,9 @@ import { ImageOff, Newspaper, ChevronRight } from 'lucide-react';
 import { fetchFarettoAccesos, fetchFarettoHomeLayout, fetchFarettoBanners, fetchFarettoBlog, FARETTO_HOME_LAYOUT_DEFAULT, FAMILIES, resolveFamily, cleanSpecValue } from '../lib/api.js';
 import { AccessIcon } from '../lib/accessIcons.jsx';
 import { formatBlogDate } from './BlogPage.jsx';
+import { familyPath } from '../lib/routes.js';
+import { useInitialData } from '../lib/initialData.js';
+import { usePageTitle, pageTitle } from '../lib/seo.js';
 
 // Accesos directos (franja de circulos con conteo por familia, debajo de los
 // 9 botones) - pedido explicito: ocultar por ahora, se retoma mas adelante.
@@ -22,12 +25,12 @@ const SHOW_ACCESOS_DESTACADOS = false;
 // Nombres en kebab-case: mismo formato que usa el admin (ver
 // src/lib/accessIcons.js y https://lucide.dev/icons).
 const FALLBACK_QUICKLINKS = [
-  { nombre: 'Plafones', icono: 'lightbulb', url_destino: '/catalogo?familia=plafones' },
-  { nombre: 'Luminaria pública', icono: 'map-pin', url_destino: '/catalogo?familia=luminaria-publica' },
-  { nombre: 'Cintas LED', icono: 'cable', url_destino: '/catalogo?familia=cintas-led' },
-  { nombre: 'Paneles LED', icono: 'layout-grid', url_destino: '/catalogo?familia=paneles-led' },
-  { nombre: 'Focos', icono: 'flashlight', url_destino: '/catalogo?familia=focos' },
-  { nombre: 'Tubos y otros', icono: 'zap', url_destino: '/catalogo?familia=tubos' },
+  { nombre: 'Plafones', icono: 'lightbulb', url_destino: '/catalogo/plafones' },
+  { nombre: 'Luminaria pública', icono: 'map-pin', url_destino: '/catalogo/luminaria-publica' },
+  { nombre: 'Cintas LED', icono: 'cable', url_destino: '/catalogo/cintas-led' },
+  { nombre: 'Paneles LED', icono: 'layout-grid', url_destino: '/catalogo/paneles-led' },
+  { nombre: 'Focos', icono: 'flashlight', url_destino: '/catalogo/focos' },
+  { nombre: 'Tubos y otros', icono: 'zap', url_destino: '/catalogo/tubos' },
   { nombre: 'Catálogo completo', icono: 'layout-list', url_destino: '/catalogo' },
   { nombre: 'Cotizar por WhatsApp', icono: 'message-circle', url_destino: 'https://wa.me/' },
   { nombre: 'Power Energy', icono: 'building-2', url_destino: 'https://powerenergy.cl' }
@@ -131,7 +134,7 @@ function ProductBannerTile({ zone, product, onNavigate }) {
     );
   }
 
-  const href = `/catalogo?familia=${resolveFamily(product.nombre).id}`;
+  const href = familyPath(resolveFamily(product.nombre).id);
   const topSpecs = pickTopSpecs(product.specs);
 
   return (
@@ -268,9 +271,11 @@ function BannersSection({ productos = [], onNavigate }) {
 
 function BlogSection({ onNavigate }) {
   // null = todavia no respondio el fetch
-  const [posts, setPosts] = useState(null);
+  const initialPosts = useInitialData('blogPosts');
+  const [posts, setPosts] = useState(initialPosts || null);
 
   useEffect(() => {
+    if (initialPosts) return undefined;
     let cancelled = false;
     fetchFarettoBlog()
       .then((data) => { if (!cancelled) setPosts(data); })
@@ -342,7 +347,8 @@ const HOME_SECTIONS = {
 
 export function HomePage({ productos, dataStatus = 'ready', onNavigate }) {
   const [accesos, setAccesos] = useState(null); // null = todavia no respondio
-  const [sectionOrder, setSectionOrder] = useState(FARETTO_HOME_LAYOUT_DEFAULT);
+  const [sectionOrder, setSectionOrder] = useState(useInitialData('homeLayout') || FARETTO_HOME_LAYOUT_DEFAULT);
+  usePageTitle(pageTitle({ name: 'home' }));
 
   useEffect(() => {
     let cancelled = false;
@@ -406,8 +412,8 @@ function FamilyStrip({ productos, dataStatus, onNavigate }) {
         <a
           key={family.id}
           className="round-category"
-          href={`/catalogo?familia=${family.id}`}
-          onClick={(event) => { event.preventDefault(); onNavigate(`/catalogo?familia=${family.id}`); }}
+          href={familyPath(family.id)}
+          onClick={(event) => { event.preventDefault(); onNavigate(familyPath(family.id)); }}
         >
           <span>
             {family.imagen ? <img src={family.imagen} alt={family.label} /> : null}

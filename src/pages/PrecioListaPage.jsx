@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { Lightbulb, MapPin, Cable, LayoutGrid, Flashlight, Zap, Boxes, Video, Bell, ShieldAlert, Lamp, ImageOff } from 'lucide-react';
 import { FAMILIES, resolveFamily, formatPrice } from '../lib/api.js';
+import { usePageTitle, pageTitle } from '../lib/seo.js';
 
 // Mismos iconos que ya usa Header.jsx para el megamenu de familias - una
 // lista de precios es, en el fondo, el mismo agrupamiento por familia que el
@@ -24,6 +25,7 @@ const FAMILY_ICONS = {
 // una lista de precios se consulta por SKU puntual, no por "producto
 // principal".
 export function PrecioListaPage({ productos }) {
+  usePageTitle(pageTitle({ name: 'precioLista' }));
   const grupos = FAMILIES
     .map((familia) => ({
       familia,

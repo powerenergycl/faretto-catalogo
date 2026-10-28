@@ -1,18 +1,16 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { Menu, X, Lightbulb, MapPin, Cable, LayoutGrid, Flashlight, Zap, Boxes, Video, Bell, ShieldAlert, Lamp, ChevronDown, ChevronRight, ArrowRight } from 'lucide-react';
-import { fetchFarettoMenu, FAMILIES, resolveFamily, resolveModelo } from '../lib/api.js';
+import { fetchFarettoMenu, FAMILIES, resolveFamily, resolveModelo, modeloSlug } from '../lib/api.js';
+import { familyPath } from '../lib/routes.js';
 
-// Solo 2 rutas reales por ahora (Home y Catalogo, por eso el pedido
-// original) - los demas links de familia navegan a /catalogo con el filtro
-// ya aplicado, no a paginas propias.
 // Respaldo mientras no haya nada cargado en el admin (Power Admin > sitio
 // Faretto > Menu principal), o si el fetch falla - la barra nunca debe
 // quedar vacia.
 const FALLBACK_NAV_LINKS = [
   { href: '/catalogo', label: 'Catálogo completo' },
-  { href: '/catalogo?familia=plafones', label: 'Plafones' },
-  { href: '/catalogo?familia=luminaria-publica', label: 'Luminaria pública' },
-  { href: '/catalogo?familia=paneles-led', label: 'Paneles LED' }
+  { href: familyPath('plafones'), label: 'Plafones' },
+  { href: familyPath('luminaria-publica'), label: 'Luminaria pública' },
+  { href: familyPath('paneles-led'), label: 'Paneles LED' }
 ];
 
 // Mismos iconos que ya usa FALLBACK_QUICKLINKS en HomePage.jsx para estas
@@ -79,16 +77,16 @@ export function Header({ route, onNavigate, productos = [] }) {
     const byId = new Map();
     productos.forEach((product) => {
       const family = resolveFamily(product.nombre);
-      if (!byId.has(family.id)) byId.set(family.id, { id: family.id, label: family.label, modelos: new Set(), count: 0 });
+      if (!byId.has(family.id)) byId.set(family.id, { id: family.id, label: family.label, modelos: new Map(), count: 0 });
       const entry = byId.get(family.id);
       entry.count += 1;
-      const modelo = resolveModelo(product.nombre);
-      if (modelo) entry.modelos.add(modelo);
+      const slug = modeloSlug(product.nombre);
+      if (slug && !entry.modelos.has(slug)) entry.modelos.set(slug, { slug, label: resolveModelo(product.nombre) });
     });
     return FAMILIES
       .map((family) => byId.get(family.id))
       .filter(Boolean)
-      .map((entry) => ({ ...entry, modelos: [...entry.modelos].sort((a, b) => a.localeCompare(b, 'es')) }));
+      .map((entry) => ({ ...entry, modelos: [...entry.modelos.values()].sort((a, b) => a.label.localeCompare(b.label, 'es')) }));
   }, [productos]);
 
   useEffect(() => {
@@ -119,11 +117,11 @@ export function Header({ route, onNavigate, productos = [] }) {
 
   const goToFamily = (familyId) => {
     setMegaMenuOpen(false);
-    onNavigate(`/catalogo?familia=${familyId}`);
+    onNavigate(familyPath(familyId));
   };
-  const goToModelo = (familyId, modelo) => {
+  const goToModelo = (familyId, slug) => {
     setMegaMenuOpen(false);
-    onNavigate(`/catalogo?familia=${familyId}&modelo=${encodeURIComponent(modelo)}`);
+    onNavigate(`${familyPath(familyId)}/${slug}`);
   };
 
   return (
@@ -193,8 +191,8 @@ export function Header({ route, onNavigate, productos = [] }) {
                         {activeFamily.modelos.length > 0 ? (
                           <div className="mega-menu-modelos">
                             {activeFamily.modelos.map((modelo) => (
-                              <button type="button" key={modelo} onClick={() => goToModelo(activeFamily.id, modelo)}>
-                                {modelo}
+                              <button type="button" key={modelo.slug} onClick={() => goToModelo(activeFamily.id, modelo.slug)}>
+                                {modelo.label}
                               </button>
                             ))}
                           </div>

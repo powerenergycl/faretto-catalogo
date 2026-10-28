@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { MessageCircle, X, Send, ImageOff, ArrowRight } from 'lucide-react';
 import { FAMILIES, resolveFamily, resolveModelo } from '../lib/api.js';
+import { productPath } from '../lib/routes.js';
 
 // Buscador conversacional local - NO es un chatbot con IA real: busca por
 // texto en el mismo catalogo ya cargado (fetchFarettoProductos, App.jsx) y
@@ -72,9 +73,7 @@ function searchProducts(productos, query) {
 
 function ResultCard({ result, onNavigate, onClose }) {
   const { product, familia, modelo } = result;
-  const href = modelo
-    ? `/catalogo?familia=${familia.id}&modelo=${encodeURIComponent(modelo)}`
-    : `/catalogo?familia=${familia.id}`;
+  const href = productPath(product);
   return (
     <a
       className="chat-result-card"

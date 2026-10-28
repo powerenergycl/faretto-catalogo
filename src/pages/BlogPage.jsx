@@ -1,6 +1,8 @@
 import { useEffect, useState } from 'react';
 import { Newspaper } from 'lucide-react';
 import { fetchFarettoBlog } from '../lib/api.js';
+import { useInitialData } from '../lib/initialData.js';
+import { usePageTitle, pageTitle } from '../lib/seo.js';
 
 export function formatBlogDate(value) {
   if (!value) return '';
@@ -11,9 +13,12 @@ export function formatBlogDate(value) {
 
 export function BlogPage({ onNavigate }) {
   // null = todavia no respondio el fetch
-  const [posts, setPosts] = useState(null);
+  const initialPosts = useInitialData('blogPosts');
+  const [posts, setPosts] = useState(initialPosts || null);
+  usePageTitle(pageTitle({ name: 'blog' }));
 
   useEffect(() => {
+    if (initialPosts) return undefined;
     let cancelled = false;
     fetchFarettoBlog()
       .then((data) => { if (!cancelled) setPosts(data); })
