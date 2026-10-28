@@ -15,9 +15,9 @@ async function build(ssr) {
   const lines = [
     '# Faretto Chile',
     '',
-    '> Catálogo oficial de iluminación técnica Faretto en Chile: plafones, paneles LED, luminaria pública, proyectores, campanas industriales, equipos de emergencia, cintas LED y más, con especificaciones y ficha técnica por modelo. Power Energy (https://www.powerenergy.cl) es distribuidor autorizado de Faretto en Chile.',
+    '> Catálogo oficial de iluminación técnica Faretto en Chile: plafones, paneles LED, luminaria pública, proyectores, campanas industriales, equipos de emergencia, cintas LED y más, con especificaciones y ficha técnica por modelo. Incluye la línea Lumex. Power Energy (https://www.powerenergy.cl) es distribuidor autorizado de las marcas Faretto y Lumex en Chile.',
     '',
-    '- Cotizaciones y venta: Power Energy, https://www.powerenergy.cl',
+    '- Distribuidor autorizado de Faretto y Lumex en Chile: Power Energy',
     `- Distribuidores autorizados por zona: ${SITE_URL}/distribuidores`,
     `- Contacto: ${SITE_URL}/contacto`,
     ''
@@ -50,7 +50,7 @@ async function build(ssr) {
     }
   }
 
-  lines.push('', '## Opcional', '', `- [Catálogo completo](${SITE_URL}/catalogo)`, `- [Sitemap](${SITE_URL}/sitemap.xml)`, '');
+  lines.push('', '## Opcional', '', `- [Catálogo completo](${SITE_URL}/catalogo)`, `- [Línea Lumex](${SITE_URL}/lumex)`, `- [Sitemap](${SITE_URL}/sitemap.xml)`, '');
   return lines.join('\n');
 }
 

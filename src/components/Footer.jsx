@@ -4,7 +4,7 @@ export function Footer() {
       <div className="footer-grid">
         <div>
           <h4>Faretto</h4>
-          <p>Illuminazione e Design, distribuido por <a href="https://www.powerenergy.cl" target="_blank" rel="noreferrer">Power Energy</a>, distribuidor autorizado en Chile.</p>
+          <p>Illuminazione e Design, distribuido por <a href="https://www.powerenergy.cl" target="_blank" rel="noreferrer">Power Energy</a>, distribuidor autorizado de Faretto y Lumex en Chile.</p>
         </div>
         <div>
           <h4>Catálogo</h4>
