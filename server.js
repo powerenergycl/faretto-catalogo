@@ -7,6 +7,7 @@ import { getProductos } from './server/data.js';
 import { loadPage, headTags, safeJson, SITE_URL } from './server/page.js';
 import { sitemapXml } from './server/sitemap.js';
 import { llmsTxt } from './server/llms.js';
+import { legacyRedirectTarget } from './server/legacyRedirects.js';
 
 // Sirve el build (dist/) renderizando cada pagina del lado del servidor con
 // los mismos componentes React del navegador (dist/server/entry-server.js),
@@ -63,6 +64,13 @@ app.use(express.static(distPath, {
     if (filePath.endsWith('index.html')) res.setHeader('Cache-Control', 'no-cache');
   }
 }));
+
+// URLs del WordPress anterior que Google todavia muestra (incluidos los PDF
+// de /fichas/) -> su equivalente actual. Ver server/legacyRedirects.js.
+app.get('*', (req, res, next) => {
+  const target = legacyRedirectTarget(req.path);
+  return target ? res.redirect(301, target) : next();
+});
 
 // Archivos que no existen (ej. /favicon.png, /wp-login.php) -> 404 de verdad,
 // no la pagina de inicio.
