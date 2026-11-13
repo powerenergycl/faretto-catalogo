@@ -78,6 +78,17 @@ app.get('/fichas/:codigo', async (req, res, next) => {
   res.set('Cache-Control', 'public, max-age=300').type('html').send(html);
 });
 
+// Enlace corto por codigo de producto: /sku/12617 -> la pagina de ese producto en
+// el catalogo. Lo usan las fichas tecnicas para llevar al lector al producto. Si
+// el codigo no esta publicado en este sitio, responde 404 como cualquier otra ruta.
+app.get('/sku/:sku', async (req, res, next) => {
+  const sku = String(req.params.sku || '').trim().toUpperCase();
+  if (!ssr || !/^[A-Z0-9-]{2,20}$/.test(sku)) return next();
+  const producto = ((await getProductos()) || []).find((p) => String(p.sku || '').toUpperCase() === sku);
+  if (!producto) return next();
+  res.set('Cache-Control', 'public, max-age=300').redirect(302, ssr.productPath(producto));
+});
+
 // URLs del WordPress anterior que Google todavia muestra (incluidos los PDF
 // de /fichas/) -> su equivalente actual. Ver server/legacyRedirects.js.
 app.get('*', (req, res, next) => {
