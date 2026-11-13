@@ -35,3 +35,24 @@ export async function fichaHtml(codigo, { fetchImpl = fetch, ahora = Date.now() 
     return guardada ? guardada.html : null;
   }
 }
+
+/** HTML del catálogo publicado (última edición), o null si aún no se publica ninguna. */
+export async function catalogoHtml({ fetchImpl = fetch, ahora = Date.now() } = {}) {
+  const LLAVE = '__catalogo__';
+  const guardada = cache.get(LLAVE);
+  if (guardada && ahora - guardada.en < TTL_MS) return guardada.html;
+  try {
+    const r = await fetchImpl(`${ORIGEN}/api/public/catalogo`, { signal: AbortSignal.timeout(15000) });
+    if (r.status === 404) {
+      cache.delete(LLAVE);
+      return null;
+    }
+    if (!r.ok) throw new Error(`origen respondió ${r.status}`);
+    const html = await r.text();
+    cache.set(LLAVE, { html, en: ahora });
+    return html;
+  } catch (error) {
+    console.warn(`[catalogo] ${error.message}`);
+    return guardada ? guardada.html : null;
+  }
+}
