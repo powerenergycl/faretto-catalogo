@@ -8,7 +8,7 @@ import { loadPage, headTags, safeJson, SITE_URL } from './server/page.js';
 import { sitemapXml } from './server/sitemap.js';
 import { llmsTxt } from './server/llms.js';
 import { legacyRedirectTarget } from './server/legacyRedirects.js';
-import { codigoFicha, fichaHtml } from './server/fichas.js';
+import { catalogoHtml, codigoFicha, fichaHtml } from './server/fichas.js';
 
 // Sirve el build (dist/) renderizando cada pagina del lado del servidor con
 // los mismos componentes React del navegador (dist/server/entry-server.js),
@@ -65,6 +65,14 @@ app.use(express.static(distPath, {
     if (filePath.endsWith('index.html')) res.setHeader('Cache-Control', 'no-cache');
   }
 }));
+
+// Catalogo tecnico completo (para guardar como PDF), publicado desde el Maestro de
+// Productos. Es distinto de /catalogo/..., que son las paginas de producto del sitio.
+app.get('/catalogo-tecnico', async (_req, res, next) => {
+  const html = await catalogoHtml();
+  if (!html) return next();
+  res.set('Cache-Control', 'public, max-age=300').type('html').send(html);
+});
 
 // Fichas tecnicas publicadas desde el Maestro de Productos: /fichas/FT-XX-MODELO.
 // Va antes de las redirecciones del WordPress anterior, que tambien usan /fichas/;
