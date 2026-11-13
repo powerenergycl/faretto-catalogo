@@ -8,6 +8,7 @@ import { loadPage, headTags, safeJson, SITE_URL } from './server/page.js';
 import { sitemapXml } from './server/sitemap.js';
 import { llmsTxt } from './server/llms.js';
 import { legacyRedirectTarget } from './server/legacyRedirects.js';
+import { codigoFicha, fichaHtml } from './server/fichas.js';
 
 // Sirve el build (dist/) renderizando cada pagina del lado del servidor con
 // los mismos componentes React del navegador (dist/server/entry-server.js),
@@ -64,6 +65,18 @@ app.use(express.static(distPath, {
     if (filePath.endsWith('index.html')) res.setHeader('Cache-Control', 'no-cache');
   }
 }));
+
+// Fichas tecnicas publicadas desde el Maestro de Productos: /fichas/FT-XX-MODELO.
+// Va antes de las redirecciones del WordPress anterior, que tambien usan /fichas/;
+// si el codigo no es una ficha publicada, la ruta sigue su camino de siempre.
+app.get('/fichas/:codigo', async (req, res, next) => {
+  const codigo = codigoFicha(req.params.codigo);
+  if (!codigo) return next();
+  if (req.params.codigo !== codigo) return res.redirect(301, `/fichas/${codigo}`);
+  const html = await fichaHtml(codigo);
+  if (!html) return next();
+  res.set('Cache-Control', 'public, max-age=300').type('html').send(html);
+});
 
 // URLs del WordPress anterior que Google todavia muestra (incluidos los PDF
 // de /fichas/) -> su equivalente actual. Ver server/legacyRedirects.js.
